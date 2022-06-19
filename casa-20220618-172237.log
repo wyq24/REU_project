@@ -1,0 +1,12 @@
+2022-06-18 17:22:37	INFO	::casa	
+2022-06-18 17:22:38	INFO	::casa	CASA Version MODULAR 6.4.3.27
+2022-06-18 17:22:38	INFO	::casa	Can't import casatelemetry module.
+2022-06-18 17:22:38	INFO	listobs::::casa	##########################################
+2022-06-18 17:22:38	INFO	listobs::::casa	##### Begin Task: listobs            #####
+2022-06-18 17:22:38	INFO	listobs::::casa	listobs( vis='/Users/walterwei/Downloads/IDB20210507_1840-1920XXYY.cal.10s.slfcaled.ms', selectdata=True, spw='', field='', antenna='', uvrange='', timerange='', correlation='', scan='', intent='', feed='', array='', observation='', verbose=True, listfile='/Users/walterwei/Downloads/IDB20210507_1840-1920XXYY.cal.10s.slfcaled.ms.listobs', listunfl=False, cachesize=50.0, overwrite=True )
+2022-06-18 17:22:38	INFO	listobs::ms::summary	Writing output to file: /Users/walterwei/Downloads/IDB20210507_1840-1920XXYY.cal.10s.slfcaled.ms.listobs
+2022-06-18 17:22:38	INFO	listobs::MSMetaData::_computeScanAndSubScanProperties 	Computing scan and subscan properties...
+2022-06-18 17:22:38	SEVERE	listobs::ms::summary	Exception Reported: Exception: Telescope EOVSA is not recognized by CASA.
+2022-06-18 17:22:38	SEVERE	listobs::ms::summary+	... thrown by casa6core::MPosition casa6core::MSMetaData::getObservatoryPosition(casa6core::uInt) const at File: casacore/ms/MSOper/MSMetaData.cc, line: 3276
+2022-06-18 17:22:39	SEVERE	listobs::::casa	Task listobs raised an exception of class RuntimeError with the following message: Exception: Telescope EOVSA is not recognized by CASA.
+2022-06-18 17:22:39	SEVERE	listobs::::casa+	... thrown by casa6core::MPosition casa6core::MSMetaData::getObservatoryPosition(casa6core::uInt) const at File: casacore/ms/MSOper/MSMetaData.cc, line: 3276
