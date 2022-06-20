@@ -24,8 +24,8 @@ from astropy.time import Time,TimeDelta
 #task handles
 dofullsun=0
 domasks=0
-doslfcal=1
-doapply=0
+doslfcal=0
+doapply=1
 dofinalclean=0 #final clean of the slfcaled data for the selected slfcal time only
 doclean_slfcaled=0 #final clean of all the slfcaled data
 
