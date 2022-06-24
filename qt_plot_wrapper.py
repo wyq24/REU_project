@@ -82,7 +82,7 @@ ql.qlookplot(vis=visibility_data, specfile=specfile, timerange=timerange,
              spw=spw, stokes=stokes, plotaia=plotaia, aiawave=aiawave,
              restoringbeam=['50arcsec'], robust = 0.5, acmap=acmap,
              imsize=imsize,cell=cell,xycen=xycen,fov=fov,
-             outfits=outfits,overwrite=False,clevels=[0.2,1,2])
+             outfits=outfits,overwrite=False,clevels=[0.8,1,2])
 
 t_exec = time.time()-t0
 t_elapsed += t_exec

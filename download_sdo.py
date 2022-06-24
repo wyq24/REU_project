@@ -9,15 +9,16 @@ import pandas as pd
 def datetime_to_str(time):
     return time.strftime("%Y-%m-%d")
 
-my_email = 'yw633@njit.edu'
+#my_email = 'yw633@njit.edu'
+my_email = 'nh72@njit.edu'
 
 print( 'start downloading AIA from JSOC...')
 
 #out_dir = '/Volumes/Data/20170715/aia/py_download/'
 #out_dir = '/Volumes/WD6T/working/20170703/aia_extra/'
-out_dir = '/Volumes/WD6T/working/20220511/aia/'
-if not os.path.exists(out_dir):
-    os.makedirs(out_dir)
+#out_dir = '/Volumes/WD6T/working/20220511/aia/'
+#if not os.path.exists(out_dir):
+#    os.makedirs(out_dir)
 WAVELNTH = [131,94,171,193,211,304,335,1600,1700]
 #WAVELNTH = [94,131,171,211,335]
 #WAVELNTH = [335]
@@ -47,7 +48,8 @@ while date_counter <= ending_date:
             #out_dir = '/Volumes/WD6T/working/20170703/aia/'
             #out_dir = '/Volumes/WD6T/working/20170820/aia/'
             #out_dir = '/Volumes/Data/from_qq/DEM/'
-            out_dir = '/Volumes/WD6T/working/20220511/aia/'
+            #out_dir = '/Volumes/WD6T/working/20220511/aia/'
+            out_dir = '/Volumes/Data/20170820/20220511/aia/'
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
             out_dir = out_dir + "% s" % w
