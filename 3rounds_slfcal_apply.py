@@ -25,14 +25,14 @@ doclean_slfcaled=0 #final clean of all the slfcaled data
 
 
 if doapply:
-    workdir = '/Volumes/Data/20170820/20220511/eovsa/eovsa_part/'
+    workdir = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/'
     slfcaldir = workdir + 'slfcal/'
     if not os.path.exists(slfcaldir):
         os.makedirs(slfcaldir)
     import glob
     slftbs_comb=[]
     caltbdir = '/Volumes/Data/20170820/20220511/eovsa/eovsa_data/slfcal/caltbs/'
-    refms = workdir + 'msdata/IDB20220511_1850-19200.ms'
+    refms = workdir + 'msdata/IDB20220511_1800-2000.ms'
     refms_slfcal_XXYY = refms + '.XXYY.slfcal'
     # refms_slfcal_XX = refms + '.XX.slfcal'
     refms_slfcaled_XXYY = refms + '.XXYY.slfcaled'

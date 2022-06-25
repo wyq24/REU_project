@@ -24,14 +24,14 @@ from astropy.time import Time,TimeDelta
 #task handles
 dofullsun=0
 domasks=0
-doslfcal=0
+doslfcal=1
 doapply=1
 dofinalclean=0 #final clean of the slfcaled data for the selected slfcal time only
 doclean_slfcaled=0 #final clean of all the slfcaled data
 
 #workdir='/Volumes/Data/20170906/msdata/2021_new_calibration/'
 #workdir='/Volumes/WD6T/working/eovsa_events/20170703/'
-workdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_data/'
+workdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/'
 #workdir='/Volumes/WD6T/working/eovsa_full_disk/'
 imagedir=workdir+'slfcal/images/'
 maskdir=workdir+'slfcal/masks/'
@@ -52,7 +52,7 @@ if not os.path.exists(caltbdir):
 #refms = workdir+'msdata/IDB20170906191320-20170906194320.corrected.ms'
 #refms = workdir+'msdata/IDB20170703_concat.ms'
 #refms = workdir+'msdata/IDB20210508_1800_1920.ms'
-refms = workdir+'msdata/IDB20220511_1830-1850.ms'
+refms = workdir+'msdata/IDB20220511_1800-2000.ms'
 refms_slfcal_XXYY = refms + '.XXYY.slfcal'
 #refms_slfcal_XX = refms + '.XX.slfcal'
 refms_slfcaled_XXYY = refms + '.XXYY.slfcaled'

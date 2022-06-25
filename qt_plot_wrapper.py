@@ -45,7 +45,7 @@ print('Wall time of this cell: {}. Elapsed time since the beginning {}:'.format(
 
 import time, datetime
 import matplotlib.pyplot as plt
-visibility_data = '/Volumes/Data/20170820/20220511/eovsa/play_ground/IDB20220511_1830-1850.ms.slfcaled'
+visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
 specfile = '/Volumes/Data/20170820/20220511/eovsa/play_ground/IDB20220511_1830-1850.ms.slfcaled.dspec.npz'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms'
 #specfile = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms.dspec.npz'
