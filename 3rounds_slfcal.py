@@ -152,7 +152,7 @@ yran=[-200,-400]
 
 #spws=[str(s+1) for s in range(len(cfreqs))]
 spws=[str(s) for s in range(len(cfreqs))]
-antennas='0~12'
+antennas='!9;!4'
 nround=3 #number of slfcal cycles
 
 subms_a=[]
