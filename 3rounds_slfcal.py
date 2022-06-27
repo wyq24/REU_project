@@ -4,7 +4,6 @@ from suncasa.utils import helioimage2fits as hf
 import os
 import numpy as np
 import pickle
-import pdb
 import suncasa.utils.mod_slftbs as mods
 from matplotlib import gridspec as gridspec
 from sunpy import map as smap
@@ -13,6 +12,18 @@ import time
 from suncasa.utils import plot_map
 import shutil
 from astropy.time import Time,TimeDelta
+from casatools import table as tbtool
+from casatools import ms as mstool
+from casatools import quanta as qatool
+from casatools import image as iatool
+
+tb = tbtool()
+ms = mstool()
+qa = qatool()
+ia = iatool()
+from casatasks import tclean
+from casatasks import split
+from suncasa.suncasatasks import ptclean6 as ptclean
 
 #from casatools import ms as mstool
 #ebmsize=[40.89866667, 35.        , 30.52746815, 27.06907583, 24.30586371,
@@ -25,13 +36,14 @@ from astropy.time import Time,TimeDelta
 dofullsun=0
 domasks=0
 doslfcal=1
-doapply=1
+doapply=0
 dofinalclean=0 #final clean of the slfcaled data for the selected slfcal time only
 doclean_slfcaled=0 #final clean of all the slfcaled data
 
 #workdir='/Volumes/Data/20170906/msdata/2021_new_calibration/'
 #workdir='/Volumes/WD6T/working/eovsa_events/20170703/'
-workdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/'
+#workdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/'
+workdir='/Volumes/WD6T/working/20220511/eovsa_full_corr/'
 #workdir='/Volumes/WD6T/working/eovsa_full_disk/'
 imagedir=workdir+'slfcal/images/'
 maskdir=workdir+'slfcal/masks/'
@@ -159,130 +171,6 @@ for t,trange in enumerate(tranges):
     subms_a.append(subms_)
     slfcaledms_a.append(slfcaledms_)
 print('HERE WE ARE!')
-if dofullsun:
-    from sunpy import map as smap
-    from matplotlib import pyplot as plt
-    fig1=plt.figure(figsize=(15,12))
-    #fig2=plt.figure(figsize=(15,12))
-    #fig3=plt.figure(figsize=(15,12))
-    for t,trange in enumerate(tranges):
-        slfcalms=slfcalms_a[t]
-        tb.open(slfcalms + '/SPECTRAL_WINDOW')
-        reffreqs = tb.getcol('REF_FREQUENCY')
-        bdwds = tb.getcol('TOTAL_BANDWIDTH')
-        cfreqs = reffreqs + bdwds / 2.
-        tb.close()
-        print(cfreqs)
-        #sbeam = 40.
-        clearcal(slfcalms)
-        delmod(slfcalms)
-        antennas='0~12'
-        pol='XX'
-        spwrans=[]
-        bmrans=[]
-        for nmi in range(int(len(cfreqs)/n_spw_per_mask)):
-            spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask+1, (nmi+1)*n_spw_per_mask))
-            bmrans.append(str(ebmsize[nmi*n_spw_per_mask+1]))
-        print('ranges are:' , spwrans, bmrans)
-        for iii in range(int(len(cfreqs)/n_spw_per_mask)):
-            #cfreq = cfreqs[iii]
-            #bm = max(sbeam * cfreqs[1] / cfreq, 6.)
-            #cur_spw=str(ebmsize[iii])
-            spwran = spwrans[iii]
-            bm = bmrans[iii]
-            cur_ax = fig1.add_subplot(2, 3, iii + 1)
-            ''''
-            if iii>11 and iii<24:
-                ploti=iii-12
-                cur_ax = fig2.add_subplot(3, 4,  ploti+ 1)
-            elif iii<12:
-                ploti=iii
-                cur_ax = fig1.add_subplot(3, 4,  ploti+ 1)
-            else:
-                ploti=iii-23
-                cur_ax = fig3.add_subplot(3, 4, ploti + 1)
-            '''
-            #cur_ax=fig.add_subplot(5,6,iii+1)
-            #initial mfs clean to find out the image phase center
-            im_init='tstimg_init_{0:0=2d}'.format(iii)
-            os.system('rm -rf '+im_init+'*')
-            '''
-            tclean(vis=slfcalms,
-                   antenna='0~12',
-                   imagename=im_init,
-                   spw=str(iii+1),
-                   # spw=cspw,
-                   specmode='mfs',
-                   timerange=trange,
-                   # imagermode='csclean',
-                   # psfmode='clark',
-                   # imsize=[256],
-                   imsize=[512],
-                   cell=['2.8arcsec'],
-                   niter=1000,
-                   gain=0.05,
-                   stokes='XX',
-                   # restoringbeam=['20arcsec'],
-                   restoringbeam=[str(bm) + 'arcsec'],
-                   # restoringbeam=['{}arcsec'.format(int(ebmsize[int(cspw)-int(1)]))],
-                   # restoringbeam=['{}arcsec'.format(int(bmrans[spwri]))],
-                   phasecenter=cphacenter,
-                   weighting='briggs',
-                   robust=1.0,
-                   interactive=False,
-                   datacolumn='data',
-                   pbcor=True,
-                   savemodel='modelcolumn')
-            '''
-            clean(vis=refms,
-                    antenna='0~12',
-                    imagename=im_init,
-                    #spw=str(iii+1),
-                    spw=spwran,
-                    #spw='1~2',
-                    #specmode='mfs',
-                    mode='mfs',
-                    timerange=trange,
-                    imagermode='csclean',
-                    #deconvolver='clark',
-                    #psfmode='clark',
-                    imsize=[512,512],
-                    cell=['2.8arcsec'],
-                    #cell=['5arcsec'],
-                    phasecenter=cphasecenter,
-                    niter=1000,
-                    gain=0.05,
-                    stokes='XX',
-                    #restoringbeam=['{}arcsec'.format(int(ebmsize[iii]))],
-                    #restoringbeam=['30arcsec'],
-                    restoringbeam=[bm],
-                    interactive=False,
-                    pbcor=True,
-                    usescratch=True)
-            hf.imreg(vis=refms,imagefile=im_init+'.image',fitsfile=im_init+'.fits',
-                     timerange=trange,usephacenter=False,verbose=True)
-            clnjunks = ['.flux', '.mask', '.model', '.psf', '.residual']
-            for clnjunk in clnjunks:
-                if os.path.exists(im_init + clnjunk):
-                    shutil.rmtree(im_init + clnjunk)
-
-            eomap=smap.Map(im_init+'.fits')
-            #eomap.data=eomap.data.reshape((512,512))
-            #new_eomap = smap.Map(eomap.data.reshape((512,512)), eomap.meta)
-            #eomap.peek()
-            #sub_eomap=plot_map.make_sub_map(cur_map=eomap,fov=[[650,-400],[1100,50]])
-            #eomap.data=eomap.data.reshape((512,512))
-            #cur_ax=fig.add_subplot(3,4,iii+1)
-            #eomap.plot_settings['cmap'] = plt.get_cmap('jet')
-            plot_map.imshow(sunpymap=eomap,axes=cur_ax)
-            #plot_map.imshow(sunpymap=new_eomap,axes=cur_ax)
-            #cur_ax.imshow(eomap.data.reshape((512,512)), origin='lower')
-            #eomap.plot()
-            eomap.draw_limb()
-            eomap.draw_grid()
-        plt.show()
-        #viewer(im_init+'.image')
-
 masks_a=[]
 if domasks:
     for t,trange in enumerate(tranges):
@@ -500,7 +388,7 @@ if doslfcal:
                             pbcor=False,
                             interactive=False)
                     '''
-                    tclean(vis=slfcalms,
+                    ptclean(vis=slfcalms,
                             antenna=antennas,
                             imagename=slfcal_img,
                             uvrange=uvranges[n],

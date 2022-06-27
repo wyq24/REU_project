@@ -32,7 +32,7 @@ matplotlib.rcParams['font.size'] = 16
 #tr_1 = int(input("Enter a tr_1:"))
 #tr_2 = int(input("Enter a tr_2:"))
 
-cur_dic = '/Volumes/WD6T/working/20170820/info/20170820_10s.p'
+cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p'
 in_dic_file = open(cur_dic, 'rb')
 in_dic = pickle.load(in_dic_file)
 in_dic_file.close()
@@ -45,7 +45,7 @@ def get_inp_files(tim):
 # define filed of view
 #fov = [[-1040,20],[-910,150]]
 #for test onlt: fov = [[-920,140],[-910,150]]
-fov = [[-1225,-100],[-900,180]]
+fov = [[900,-360],[1000,-220]]
 start_tim = time.time()
 def make_sub_map(cur_map, fov=None, ref_map=None):
     if not ref_map:
@@ -114,7 +114,8 @@ def iter_by_time(ti):
     worder = np.argsort(wvn)
     print(worder)
 
-    trin = io.readsav('/Users/walter/software/external_package/demreg/python/aia_tresp_en.dat')
+    #trin = io.readsav('/Users/walter/software/external_package/demreg/python/aia_tresp_en.dat')
+    trin = io.readsav('/Users/walterwei/software/external_package/demreg/python/aia_tresp_en.dat')
     tresp_logt = np.array(trin['logt'])
     nt = len(tresp_logt)
     nf = len(trin['tr'][:])
@@ -178,7 +179,9 @@ def iter_by_time(ti):
     res_info['fov'] = fov
     res_info['mtime'] = cctime.isot
     #pickle.dump(res_list, open('/Volumes/WD6T/working/20170820/dem/res_save/multi_t{0:0=4d}.p'.format(tim), 'wb'),protocol=2)
-    pickle.dump((res_list,res_info), open('/Volumes/WD6T/working/20170820/dem/res_save/multi_t{0:0=4d}.p'.format(ti), 'wb'),protocol=2)
+    #pickle.dump((res_list,res_info), open('/Volumes/WD6T/working/20170820/dem/res_save/multi_t{0:0=4d}.p'.format(ti), 'wb'),protocol=2)
+    pickle.dump((res_list, res_info),
+                open('/Volumes/Data/20170820/20220511/dem/res_save/multi_t{0:0=4d}.p'.format(ti), 'wb'))
 #iter_by_time(0)
 
 def dem_calculator(odem_res, get_em=False):
@@ -248,7 +251,8 @@ ncpu = 4
 #n_time = len(in_dic)
 #inp_tim_list = np.arange(184,362).tolist()
 #inp_tim_list = np.arange(50,350).tolist()
-inp_tim_list = np.arange(200,250).tolist()
+#inp_tim_list = np.arange(200,250).tolist()
+inp_tim_list = [60,100,140,150,160]
 
 cp = Pool(ncpu)
 #final_resl = cp.map(cal_func, multi_input_tuple_list)

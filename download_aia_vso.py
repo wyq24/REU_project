@@ -5,9 +5,12 @@ from astropy import units as u
 import os
 
 outdir = '/Volumes/Data/20170820/20220511/aia/'
-tst = Time('2022-05-11 18:30:00',format='iso')
-tet = Time('2022-05-11 19:00:00',format='iso')
-wavelength = [94.,131.,171.,193.,211.,335.,304.]
+#tst = Time('2022-05-11 18:30:00',format='iso')
+#tet = Time('2022-05-11 19:00:00',format='iso')
+tst = Time('2022-05-11 19:00:00',format='iso')
+tet = Time('2022-05-11 19:20:00',format='iso')
+wavelength = [94.,131.,171.,193.,211.,335.,304.,1600., 1700.]
+#wavelength = [1600., 1700.]
 for widx, wave in enumerate(wavelength):
     wave1 = wave - 3.0
     wave2 = wave + 3.0
