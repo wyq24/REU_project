@@ -162,7 +162,7 @@ slfcaledms_a=[]
 #for t in range(298):
 #for t in range(180):
 #for t in range(180):
-for t in range(300):
+for t in range(2,300):
     trange=tranges[t]
     slfcaledms_ = workdir+'slfcal/IDB20220511.ms.t{0:d}.XXYY.slfcaled'.format(t)
     #slfcaledms_ = workdir+'slfcal/IDB20170703.ms.t{0:d}.XX'.format(t)
@@ -183,6 +183,7 @@ if doclean_slfcaled:
     #if os.path.exists(workdir+'slfcal/masks_a.p'):
     #    masks_a=pickle.load(open(workdir+'slfcal/masks_a.p','rb'))
     for t,trange in enumerate(tranges):
+        if t < 2: continue
         #if t<40 or t>44: continue
         #if t<90 or t>94: continue
         #if t<0 or t>2: continue
@@ -192,7 +193,8 @@ if doclean_slfcaled:
         trange=tranges[t]
         slfcaledms = slfcaledms_a[t]
         #img_final=imagedir_slfcaled+'/slf_final_{0}_t{1:d}'.format(pol,t)
-        img_final=imagedir_slfcaled+'slfcaled_tb_final_XX_10s_{0}_t{1:d}'.format(pol,t)
+        #img_final=imagedir_slfcaled+'slfcaled_tb_final_XX_10s_{0}_t{1:d}'.format(pol,t)
+        img_final='slfcaled_tb_final_XX_10s_{0}_t{1:d}'.format(pol,t)
         #masks=masks_a[t]
         #spws=[str(s+1) for s in range(30)]
         #tb.open(slfcaledms+'/SPECTRAL_WINDOW')
@@ -274,31 +276,31 @@ if doclean_slfcaled:
                 #             pbcor=True,
                 #             interactive=False)
                 #             #usescratch=False)
-                try:
-                    res = ptclean(vis=slfcaledms,
-                                  imageprefix=imagedir_slfcaled,
-                                  imagesuffix=imname,
-                                  timerange=trange,
-                                  twidth=12,
-                                  spw=sp,
-                                  restoringbeam=[bm],
-                                  ncpu=6,
-                                  niter=1000,
-                                  gain=0.1,
-                                  imsize=[256],
-                                  cell=['2arcsec'],
-                                  stokes='XX',
-                                  doreg=True,
-                                  usephacenter=True,
-                                  phasecenter=phasecenter,
-                                  docompress=False,
-                                  toTb=True,
-                                  pbcor=True,
-                                  weighting='briggs',
-                                  robust=0.0)
-                except:
-                    print('cleaning spw '+sp+' unsuccessful. Proceed to next spw')
-                    continue
+
+                res = ptclean(vis=slfcaledms,
+                              imageprefix=imagedir_slfcaled,
+                              imagesuffix=imname,
+                              timerange=trange,
+                              twidth=12,
+                              spw=sp,
+                              restoringbeam=[bm],
+                              ncpu=6,
+                              niter=1000,
+                              gain=0.1,
+                              imsize=[256],
+                              cell=['2arcsec'],
+                              stokes='XX',
+                              doreg=True,
+                              usephacenter=True,
+                              phasecenter=phasecenter,
+                              docompress=False,
+                              toTb=True,
+                              pbcor=True,
+                              weighting='briggs',
+                              robust=0.0)
+                # except:
+                #     print('cleaning spw '+sp+' unsuccessful. Proceed to next spw')
+                #     continue
                 if os.path.exists(imname+'.image'):
                     hf.imreg(vis=slfcaledms,imagefile=imname+'.image',fitsfile=fitsfile,
                              timerange=trange,toTb=True,verbose=False,)
