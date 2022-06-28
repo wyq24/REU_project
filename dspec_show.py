@@ -12,7 +12,42 @@ import copy
 from astropy.io import fits
 from scipy.signal import savgol_filter
 import warnings
+from make_dict_list import makelist
+import sunpy.map as smap
 
+
+def tmp_spectrum_creator():
+    with open('/Volumes/Data/20170820/20220511/info/bmsize.p', 'rb') as fbmsize:
+        bmsize = pickle.load(fbmsize, encoding='latin1')
+    fbmsize.close()
+    with open('/Volumes/Data/20170820/20220511/info/cfreqs.p', 'rb') as fcfreq:
+        cfreq = pickle.load(fcfreq, encoding='latin1')
+    fcfreq.close()
+    cfov = [[[865,-408],[1070,-174]]]
+    p_list = makelist()
+    b_list = []
+    p_arr = np.zeros((50))
+    b_arr = np.zeros((50))
+    for spwi in range(50):
+        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(p_list), fov=cfov)
+        new_sum_data = cur_sub_map.data
+        old_sum = np.nansum(new_sum_data.clip(min=0.0))
+        cur_sfu = pt.test_convertion(tb=old_sum, pix=2.0, bmmin=bmsize[spwi], freq=cfreq[spwi], switch='tb2sfu')
+        p_arr[spwi] = cur_sfu
+    for spwi in range(50):
+        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(b_list), fov=cfov)
+        new_sum_data = cur_sub_map.data
+        old_sum = np.nansum(new_sum_data.clip(min=0.0))
+        cur_sfu = pt.test_convertion(tb=old_sum, pix=2.0, bmmin=bmsize[spwi], freq=cfreq[spwi], switch='tb2sfu')
+        b_arr[spwi] = cur_sfu
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(6, 4))
+    axs[0].plot(cfreq, b_arr, label='bkg')
+    axs[0].plot(cfreq, p_arr , label='Peak')
+    axs[1].plot(cfreq, np.subtract(p_arr, b_arr),
+                label='BKGsubed_Peak')
+    axs[0].legend()
+    axs[1].legend()
+    plt.show()
 def all_eovsa_image(tim):
     fig, axs = plt.subplots(nrows=5, ncols=7, sharex=True, sharey=True, figsize=(12, 8))
     axs = [eaxes for erow in axs for eaxes in erow]

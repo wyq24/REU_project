@@ -66,7 +66,7 @@ refms_slfcaled = refms + '.slfcaled'
 #refms_slfcaled = '/Volumes/WD6T/working/20170703/eovsa_10s/msdata/IDB20170703_concat.ms.XXYY.slfcaled'
 refms_slfcaled = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
 
-init_time='2022-05-11T18:35:00.002'
+init_time='2022-05-11T18:36:00.002'
 time_interval=10.0
 tranges=[]
 tname=[]
@@ -152,7 +152,7 @@ print('Phasecenter: ',phasecenter)
 #xran=[617,867]
 #yran=[-271,-21]
 spws=[str(s) for s in range(len(cfreqs))]
-antennas='0~12' 
+antennas='!4;!9'
 nround=3 #number of slfcal cycles
 
 subms_a=[]
@@ -162,7 +162,7 @@ slfcaledms_a=[]
 #for t in range(298):
 #for t in range(180):
 #for t in range(180):
-for t in range(2,300):
+for t in range(300):
     trange=tranges[t]
     slfcaledms_ = workdir+'slfcal/IDB20220511.ms.t{0:d}.XXYY.slfcaled'.format(t)
     #slfcaledms_ = workdir+'slfcal/IDB20170703.ms.t{0:d}.XX'.format(t)
@@ -172,7 +172,7 @@ for t in range(2,300):
     #if t>=40 and t<45:
     #if t>=144:
     #if t>=150:
-    if not os.path.exists(slfcaledms_) and t<180:
+    if not os.path.exists(slfcaledms_) and t in [36,141]:
         print(slfcaledms_+' no file found')
         split(vis=refms_slfcaled,outputvis=slfcaledms_,datacolumn='data',timerange=trange,correlation='')
     slfcaledms_a.append(slfcaledms_)
@@ -183,7 +183,7 @@ if doclean_slfcaled:
     #if os.path.exists(workdir+'slfcal/masks_a.p'):
     #    masks_a=pickle.load(open(workdir+'slfcal/masks_a.p','rb'))
     for t,trange in enumerate(tranges):
-        if t < 2: continue
+        if not t in [36,141]: continue
         #if t<40 or t>44: continue
         #if t<90 or t>94: continue
         #if t<0 or t>2: continue
@@ -280,11 +280,12 @@ if doclean_slfcaled:
                 res = ptclean(vis=slfcaledms,
                               imageprefix=imagedir_slfcaled,
                               imagesuffix=imname,
+                              antennas='!4;!9',
                               timerange=trange,
                               twidth=12,
                               spw=sp,
                               restoringbeam=[bm],
-                              ncpu=6,
+                              ncpu=8,
                               niter=1000,
                               gain=0.1,
                               imsize=[256],

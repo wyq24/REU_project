@@ -12,18 +12,22 @@ import time
 from suncasa.utils import plot_map
 import shutil
 from astropy.time import Time,TimeDelta
-from casatools import table as tbtool
-from casatools import ms as mstool
-from casatools import quanta as qatool
-from casatools import image as iatool
-
-tb = tbtool()
-ms = mstool()
-qa = qatool()
-ia = iatool()
-from casatasks import tclean
-from casatasks import split
-from suncasa.suncasatasks import ptclean6 as ptclean
+# from casatools import table as tbtool
+# from casatools import ms as mstool
+# from casatools import quanta as qatool
+# from casatools import image as iatool
+#
+# tb = tbtool()
+# ms = mstool()
+# qa = qatool()
+# ia = iatool()
+# from casatasks import tclean
+# from casatasks import split
+# from casatasks import gaincal
+# from casatasks import applycal
+# from casatasks import delmod
+# from casatasks import clearcal
+# from suncasa.suncasatasks import ptclean6 as ptclean
 
 #from casatools import ms as mstool
 #ebmsize=[40.89866667, 35.        , 30.52746815, 27.06907583, 24.30586371,
@@ -35,8 +39,8 @@ from suncasa.suncasatasks import ptclean6 as ptclean
 #task handles
 dofullsun=0
 domasks=0
-doslfcal=1
-doapply=0
+doslfcal=0
+doapply=1
 dofinalclean=0 #final clean of the slfcaled data for the selected slfcal time only
 doclean_slfcaled=0 #final clean of all the slfcaled data
 
@@ -388,7 +392,7 @@ if doslfcal:
                             pbcor=False,
                             interactive=False)
                     '''
-                    ptclean(vis=slfcalms,
+                    tclean(vis=slfcalms,
                             antenna=antennas,
                             imagename=slfcal_img,
                             uvrange=uvranges[n],
@@ -475,13 +479,13 @@ if doslfcal:
             if os.path.exists(slfcal_tb_g):
                 slftbs.append(slfcal_tb_g)
                 slftb=[slfcal_tb_g]
-                os.chdir(slfcaldir)
-                if calmodes[n] == 'p':
-                    plotcal(caltable=slfcal_tb_g,antenna='1~12',xaxis='freq',yaxis='phase',\
-                            subplot=431,plotrange=[-1,-1,-180,180],iteration='antenna',figfile=slfcal_tb_g+'.png',showgui=False)
-                if calmodes[n] == 'a':
-                    plotcal(caltable=slfcal_tb_g,antenna='1~12',xaxis='freq',yaxis='amp',\
-                            subplot=431,plotrange=[-1,-1,0,2.],iteration='antenna',figfile=slfcal_tb_g+'.png',showgui=False)
+                # os.chdir(slfcaldir)
+                # if calmodes[n] == 'p':
+                #     plotcal(caltable=slfcal_tb_g,antenna='1~12',xaxis='freq',yaxis='phase',\
+                #             subplot=431,plotrange=[-1,-1,-180,180],iteration='antenna',figfile=slfcal_tb_g+'.png',showgui=False)
+                # if calmodes[n] == 'a':
+                #     plotcal(caltable=slfcal_tb_g,antenna='1~12',xaxis='freq',yaxis='amp',\
+                #             subplot=431,plotrange=[-1,-1,0,2.],iteration='antenna',figfile=slfcal_tb_g+'.png',showgui=False)
                 os.chdir(workdir)
             if doapplycal[n]:
                 clearcal(slfcalms)
