@@ -14,28 +14,37 @@ from scipy.signal import savgol_filter
 import warnings
 from make_dict_list import makelist
 import sunpy.map as smap
+import warnings
 
 
 def tmp_spectrum_creator():
+    warnings.filterwarnings('ignore')
     with open('/Volumes/Data/20170820/20220511/info/bmsize.p', 'rb') as fbmsize:
         bmsize = pickle.load(fbmsize, encoding='latin1')
     fbmsize.close()
     with open('/Volumes/Data/20170820/20220511/info/cfreqs.p', 'rb') as fcfreq:
         cfreq = pickle.load(fcfreq, encoding='latin1')
     fcfreq.close()
-    cfov = [[[865,-408],[1070,-174]]]
-    p_list = makelist()
-    b_list = []
+    #cfov = [[865,-408],[1070,-174]]
+    cfov = [[913,-288],[961,-232]]
+    p_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled_/',keyword1='_t41_'
+                      , keyword2='fits')
+    p_list.sort()
+    b_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled_/',keyword1='_t146_'
+                      , keyword2='fits')
+    b_list.sort()
+    print(p_list)
+    print(b_list)
     p_arr = np.zeros((50))
     b_arr = np.zeros((50))
     for spwi in range(50):
-        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(p_list), fov=cfov)
+        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(p_list[spwi]), fov=cfov)
         new_sum_data = cur_sub_map.data
         old_sum = np.nansum(new_sum_data.clip(min=0.0))
         cur_sfu = pt.test_convertion(tb=old_sum, pix=2.0, bmmin=bmsize[spwi], freq=cfreq[spwi], switch='tb2sfu')
         p_arr[spwi] = cur_sfu
     for spwi in range(50):
-        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(b_list), fov=cfov)
+        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(b_list[spwi]), fov=cfov)
         new_sum_data = cur_sub_map.data
         old_sum = np.nansum(new_sum_data.clip(min=0.0))
         cur_sfu = pt.test_convertion(tb=old_sum, pix=2.0, bmmin=bmsize[spwi], freq=cfreq[spwi], switch='tb2sfu')
@@ -47,6 +56,8 @@ def tmp_spectrum_creator():
                 label='BKGsubed_Peak')
     axs[0].legend()
     axs[1].legend()
+    axs[1].set_ylim([-1, 90])
+    axs[0].set_ylim([-1, 150])
     plt.show()
 def all_eovsa_image(tim):
     fig, axs = plt.subplots(nrows=5, ncols=7, sharex=True, sharey=True, figsize=(12, 8))
@@ -339,8 +350,9 @@ def dip_ratio():
     ax.legend()
     plt.show()
 def main():
-    spatial_dspec_minus()
+    #spatial_dspec_minus()
     #cali_tp_spectrum()
+    tmp_spectrum_creator()
 
 if __name__ == '__main__':
     main()
