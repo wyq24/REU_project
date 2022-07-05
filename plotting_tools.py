@@ -5,8 +5,11 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 import sunpy.map as smap
 import warnings
+import math
 
 def image_to_dynamicspec(fov=None, dic_file=None, spec_method=None, timerange=None,source_size=None,pix_size=2.0,high_tres = False):
+    fov = [[940,-320],[960,-300]]
+    fov_list = [[[862,-374],[1066,-176]],[[909,-349],[989,-223]],[[909,-345],[972,-226]],[[910,-298],[957,-235]],[[910,-295],[952,-243]]]
     warnings.filterwarnings('ignore')
     spec_dict = {}
     with open('/Volumes/Data/20170820/20220511/info/bmsize.p', 'rb') as fbmsize:
@@ -19,9 +22,9 @@ def image_to_dynamicspec(fov=None, dic_file=None, spec_method=None, timerange=No
     in_dic_file = open(cur_dic, 'rb')
     in_dic = pickle.load(in_dic_file)
     in_dic_file.close()
-    if fov is 'custom':
-        fov_list = [[[865,-408],[1070,-174]]]
-        fov = fov_list[0]
+    # if fov is 'custom':
+    #     fov_list = [[[865,-408],[1070,-174]]]
+    #     fov = fov_list[0]
         #fov_list = [[[897,-11],[1018,98]],[[901,4],[1009,92]],[[918,16],[ 986,72]],[[922,15],[980,71]],[[926,31],[964,71]],[[929,35 ],[957,76]]]
     if not timerange:
         timerange = [0, len(in_dic)-1]
@@ -33,17 +36,21 @@ def image_to_dynamicspec(fov=None, dic_file=None, spec_method=None, timerange=No
         print(i)
         time_res[i - timerange[0]] = Time(in_dic[i]['time'], format='iso').mjd * 3600. * 24
         for ii in range(50):
-            if fov=='custom':
-                print('use custom fov')
-                #cfov = fov_list[int(np.floor(ii/5))]
-                cfov = fov_list[0]
-                fov = cfov
-                #print(in_dic[i]['radio_sbs'][ii])
-                cur_sub_map = make_sub_map(cur_map=smap.Map(in_dic[i]['radio_sbs'][ii]), fov=cfov)
-            elif fov:
-                cur_sub_map = make_sub_map(cur_map=smap.Map(in_dic[i]['radio_sbs'][ii]), fov=fov)
-            else:
-                cur_sub_map =smap.Map(in_dic[i]['radio_sbs'][ii])
+            #cfov = fov_list[min(int(math.floor(ii / 5)), 4)]
+            cfov = fov
+            cur_sub_map = make_sub_map(cur_map=smap.Map(in_dic[i]['radio_sbs'][ii]), fov=cfov)
+            # if fov=='custom':
+            #     print('use custom fov')
+            #     #cfov = fov_list[int(np.floor(ii/5))]
+            #     # cfov = fov_list[0]
+            #     # fov = cfov
+            #     cfov = fov_list[min(int(math.floor(ii/5)),4)]
+            #     #print(in_dic[i]['radio_sbs'][ii])
+            #     cur_sub_map = make_sub_map(cur_map=smap.Map(in_dic[i]['radio_sbs'][ii]), fov=cfov)
+            # elif fov:
+            #     cur_sub_map = make_sub_map(cur_map=smap.Map(in_dic[i]['radio_sbs'][ii]), fov=fov)
+            # else:
+            #     cur_sub_map =smap.Map(in_dic[i]['radio_sbs'][ii])
             new_sum_data=cur_sub_map.data
             old_sum = np.nansum(new_sum_data.clip(min=0.0))
             #old_sum = np.nansum(new_sum_data)
@@ -62,6 +69,7 @@ def image_to_dynamicspec(fov=None, dic_file=None, spec_method=None, timerange=No
     #cur_name = '/Volumes/Data/20170820/eovsa/image_dspec/10s_dspec_{0}_{1}_{2}_{3}.p'.format(abs(cfov[0][0]),abs(cfov[0][1]),abs(cfov[1][0]),abs(cfov[1][1]))
     #cur_name = '/Volumes/Data/20170820/eovsa/image_dspec/part/10s_dspec_{0}_{1}_{2}_{3}.p'.format(abs(fov[0][0]),abs(fov[0][1]),abs(fov[1][0]),abs(fov[1][1]))
     cur_name = '/Volumes/Data/20170820/20220511/eovsa/image_dspec/10s_dspec_{0}_{1}_{2}_{3}.p'.format(abs(fov[0][0]),abs(fov[0][1]),abs(fov[1][0]),abs(fov[1][1]))
+    #cur_name = '/Volumes/Data/20170820/20220511/eovsa/image_dspec/fov_list_10s_dspec.p'
     #cur_name = '/Volumes/Data/20170820/eovsa/image_dspec/bkg_10s_dspec_{0}_{1}_{2}_{3}.p'.format(abs(cfov[0][0]),abs(cfov[0][1]),abs(cfov[1][0]),abs(cfov[1][1]))
     pickle.dump(spec_dict, open(cur_name,'wb'))
     return spec_dict
@@ -273,3 +281,35 @@ def lightcurve(timerange, x, y, kw_list, world=True, radio=False, sample_range=1
         else:
             return (dates, lc_arr)
     return cim
+
+def aia_max(aia_exp_file):
+    aia_exp = pickle.load(open(aia_exp_file, 'rb'))
+    aia_max_dic = {}
+    for cur_key in aia_exp.keys():
+        aia_max_dic[cur_key] = 0.0
+        for i, cfile in enumerate(aia_exp[cur_key]['file_list']):
+            print(i)
+            print(cfile)
+            cxdata=np.nanmax(smap.Map(cfile).data)
+            if cxdata > aia_max_dic[cur_key]:
+                aia_max_dic[cur_key] = cxdata
+    print(aia_max_dic)
+    pickle.dump(aia_max_dic, open('/Volumes/Data/20170820/20220511/info/aia_max.p','wb'))
+    return aia_max_dic
+
+
+def aia_exp(dic_file):
+    in_dic = pickle.load(open(dic_file, 'rb'))
+    aia_max_dic = {}
+    for cur_key in in_dic[0].keys():
+        aia_max_dic[cur_key] = np.zeros(len(in_dic))
+    for i, dic in enumerate(in_dic):
+        print(i)
+        for ckey in dic.keys():
+            if 'Z' in ckey:
+                # if np.nanmax(smap.Map(dic[ckey]).data) > aia_max_dic[ckey]:
+                #    aia_max_dic[ckey] = np.nanmax(smap.Map(dic[ckey]).data)
+                aia_max_dic[ckey][i]=smap.Map(dic[ckey]).meta['exptime']
+    pickle.dump(aia_max_dic, open('/Volumes/Data/20170820/20220511/info/aia_exp.p','wb'))
+    return aia_max_dic
+

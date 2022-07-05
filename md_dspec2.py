@@ -15,6 +15,7 @@ import matplotlib as mpl
 import numpy.ma as ma
 #import ex_plot_1 as ep
 import plotting_tools as pt
+import warnings
 
 font = {'weight': 'bold',
         'size': 12}
@@ -108,6 +109,7 @@ def plt_dspec(specdata, pol='I', dmin=None, dmax=None,over_all_tr=None,
     import numpy
     from numpy import log10
     from astropy.time import Time
+    warnings.filterwarnings('ignore')
     if pol != 'RR' and pol != 'LL' and pol != 'RRLL' and pol != 'I' and pol != 'V' and pol != 'IV':
         print ("Please enter 'RR', 'LL', 'RRLL', 'I', 'V', 'IV' for pol")
         return 0

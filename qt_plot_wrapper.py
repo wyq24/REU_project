@@ -45,8 +45,11 @@ print('Wall time of this cell: {}. Elapsed time since the beginning {}:'.format(
 
 import time, datetime
 import matplotlib.pyplot as plt
-visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
-specfile = '/Volumes/Data/20170820/20220511/eovsa/play_ground/IDB20220511_1830-1850.ms.slfcaled.dspec.npz'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled'
+visibility_data = '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/playground/IDB20220511_1830_1840_sub_1805_1808.ms.XXYY.slfcaled'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_data/msdata/IDB20220511_1830-1850.ms'
+#specfile = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled.dspec.npz'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms'
 #specfile = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms.dspec.npz'
 t0 = time.time()
@@ -56,7 +59,23 @@ from suncasa.utils.mstools import time2filename
 ## (Optional) Supply the npz file of the dynamic spectrum from previous step.
 ## If not provided, the program will generate a new one from the visibility.
 ## set the time interval
-timerange = '18:40:25~18:40:45'
+#timerange = '18:40:25~18:40:45'
+timerange = '18:30:00~18:30:20'
+#t0 = time.time()
+from suncasa import dspec as ds
+import time
+# The example below shows the cross-power spectrogram from a baseline selected using the parameter "bl".
+# bl = '4&9' means selecting a baseline from Antenna ID 4 (Antenna Name "eo05") correlating with Antenna ID 9 (Antenna Name "eo10") - c.f., listobs outputs.
+# you can also use the "bl" parameter to select multiple baseline(s), i.e., bl='0&2;4&9;8&11'.
+specfile = visibility_data + '.dspec.npz'
+d = ds.Dspec(visibility_data, bl='3&10', specfile=specfile)
+d.plot(vmin=0.0, vmax=300, pol='XX')
+print(d.data.shape) # npol, nbl, nfreq, ntime
+
+#t_exec = time.time()-t0
+#t_elapsed += t_exec
+#print('Wall time of this cell: {}. Elapsed time since the beginning {}:'.format(datetime.timedelta(seconds=t_exec),datetime.timedelta(seconds=t_elapsed)))
+
 ## select (almost) all spectral windows from spw id #0 to #47
 #spw = ['{}'.format(l) for l in range(48)]
 spw = ['{}'.format(l) for l in range(45)]
@@ -64,13 +83,17 @@ outfits = time2filename(visibility_data,timerange=timerange)+'.outim.image.allbd
 ## select stokes XX
 stokes = 'XX'
 ## image center for clean in solar X-Y in arcsec
-xycen=[912.0,-295.0]
+#xycen=[912.0,-295.0]
+#xycen=[912.0,-195.0]
+xycen=[0.0,0.0]
 ## pixel scale
-cell=['2.0arcsec']
+#cell=['2.0arcsec']
+cell=['5.0arcsec']
 ## number of pixels in X and Y. If only one value is provided, NX = NY
-imsize=[128]
+#imsize=[128]
+imsize=[512]
 ## field of view of the zoomed-in panels in unit of arcsec
-fov = [300,300]
+fov = [2460,2460]
 ## turn off AIA image plotting, default is True
 plotaia = True
 ## AIA passband in Å. The options are [171,131,304,335,211,193,94,1600,1700]
@@ -82,7 +105,7 @@ ql.qlookplot(vis=visibility_data, specfile=specfile, timerange=timerange,
              spw=spw, stokes=stokes, plotaia=plotaia, aiawave=aiawave,
              restoringbeam=['50arcsec'], robust = 0.5, acmap=acmap,
              imsize=imsize,cell=cell,xycen=xycen,fov=fov,
-             outfits=outfits,overwrite=False,clevels=[0.8,1,2])
+             outfits=outfits,overwrite=False,clevels=[0.2,1,2])
 
 t_exec = time.time()-t0
 t_elapsed += t_exec

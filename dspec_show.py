@@ -18,6 +18,7 @@ import warnings
 
 
 def tmp_spectrum_creator():
+    import math
     warnings.filterwarnings('ignore')
     with open('/Volumes/Data/20170820/20220511/info/bmsize.p', 'rb') as fbmsize:
         bmsize = pickle.load(fbmsize, encoding='latin1')
@@ -26,11 +27,15 @@ def tmp_spectrum_creator():
         cfreq = pickle.load(fcfreq, encoding='latin1')
     fcfreq.close()
     #cfov = [[865,-408],[1070,-174]]
-    cfov = [[913,-288],[961,-232]]
-    p_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled_/',keyword1='_t41_'
+    #cfov = [[913,-288],[961,-232]]
+    fov_list = [[[862, -374], [1066 ,-176]], [[909, -349], [989, -223]], [[909, -345], [972, -226]],
+                [[910, -298], [957, -235]], [[910, -295], [952, -243]]]
+    fov_list = [[[822, -414], [1106 ,-136]], [[879, -379], [1019, -193]], [[909, -345], [972, -226]],
+                [[910, -298], [957, -235]], [[910, -295], [952, -243]]]
+    p_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled/',keyword1='_t41_'
                       , keyword2='fits')
     p_list.sort()
-    b_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled_/',keyword1='_t146_'
+    b_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled/',keyword1='_t146_'
                       , keyword2='fits')
     b_list.sort()
     print(p_list)
@@ -38,13 +43,14 @@ def tmp_spectrum_creator():
     p_arr = np.zeros((50))
     b_arr = np.zeros((50))
     for spwi in range(50):
-        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(p_list[spwi]), fov=cfov)
+        findex = min(int(math.floor(spwi/5)),4)
+        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(p_list[spwi]), fov=fov_list[findex])
         new_sum_data = cur_sub_map.data
         old_sum = np.nansum(new_sum_data.clip(min=0.0))
         cur_sfu = pt.test_convertion(tb=old_sum, pix=2.0, bmmin=bmsize[spwi], freq=cfreq[spwi], switch='tb2sfu')
         p_arr[spwi] = cur_sfu
     for spwi in range(50):
-        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(b_list[spwi]), fov=cfov)
+        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(b_list[spwi]), fov=fov_list[min(int(math.floor(spwi/5)),4)])
         new_sum_data = cur_sub_map.data
         old_sum = np.nansum(new_sum_data.clip(min=0.0))
         cur_sfu = pt.test_convertion(tb=old_sum, pix=2.0, bmmin=bmsize[spwi], freq=cfreq[spwi], switch='tb2sfu')
@@ -59,6 +65,7 @@ def tmp_spectrum_creator():
     axs[1].set_ylim([-1, 90])
     axs[0].set_ylim([-1, 150])
     plt.show()
+    return (p_arr,b_arr,np.subtract(p_arr, b_arr))
 def all_eovsa_image(tim):
     fig, axs = plt.subplots(nrows=5, ncols=7, sharex=True, sharey=True, figsize=(12, 8))
     axs = [eaxes for erow in axs for eaxes in erow]
@@ -248,11 +255,32 @@ def tp_fits_to_spectrum():
 '''
 
 def cal_ratio():
-    with open('/Volumes/Data/20170820/info/eovsa_cfreqs.p', 'rb') as fcfreq:
-        cfreq = pickle.load(fcfreq)
+    with open('/Volumes/Data/20170820/20220511/info/cfreqs.p', 'rb') as fcfreq:
+        cfreq = pickle.load(fcfreq, encoding='latin1')
     fcfreq.close()
+    if True:
+        fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(6, 4))
+
+        with open('/Volumes/Data/20170820/20220511/eovsa/image_dspec/10s_dspec_865_408_1070_174.p', 'rb') as image_dspec_save:
+            image_dspec = pickle.load(image_dspec_save)
+        image_dspec_save.close()
+        img_res_all = tmp_spectrum_creator()
+        img_res = img_res_all[2]
+        axs[0].plot(cfreq,img_res_all[1],label='bkg')
+        axs[0].plot(cfreq,img_res_all[0],label='Peak')
+        axs[1].plot(cfreq,img_res,label='BKGsubed_Peak')
+        axs[0].legend()
+        axs[1].legend()
+        axs[1].set_ylim([-1,100])
+        axs[0].set_ylim([-1,100])
+        #ep.axes_helper(cax=axs[1], ylabel='FD[sfu]', xlabel='Freq_Hz')
+        #ep.axes_helper(cax=axs[0], ylabel='FD[sfu]')
+        fig.suptitle('image integrated FD')
+
+        plt.show()
+
     tp_res=cali_tp_spectrum()
-    img_res=spatial_dspec_minus(do_plot=True)
+    #img_res=spatial_dspec_minus(do_plot=True)
     print('img integ: ',img_res )
     print('tp: ',tp_res )
     #img_res=spatial_dspec_minus(phase=1,source='whole_fov',do_plot=True)
@@ -263,9 +291,9 @@ def cal_ratio():
         freq_index.append(min(range(len(tp_res[1])), key=lambda ii: abs(tp_res[1][ii] - cur_cfreq)))
     print('freq_index is : ', freq_index, len(freq_index))
     tp_plot=tp_res[0][freq_index]
-    ratio=np.zeros((31))
+    ratio=np.zeros((50))
     ratio[0] = 1.0
-    for iii in range(31):
+    for iii in range(50):
         if iii == 0: continue
         #ratio[iii]=tp_plot[iii]/img_res['spec'][0,0,iii,309]
         #ratio[iii]=tp_res[iii]/img_res[iii]
@@ -277,7 +305,7 @@ def cal_ratio():
     axs.plot(cfreq,sratio,label='smoothed')
     axs.legend()
     axs.set_ylim([0.0,3.0])
-    ep.axes_helper(cax=axs, ylabel='EOVSA_tp/img_integed', xlabel='Freq_GHz')
+    #ep.axes_helper(cax=axs, ylabel='EOVSA_tp/img_integed', xlabel='Freq_GHz')
     print(sratio)
     plt.show()
 def verify_std(ctim=0):
@@ -352,7 +380,8 @@ def dip_ratio():
 def main():
     #spatial_dspec_minus()
     #cali_tp_spectrum()
-    tmp_spectrum_creator()
+    #tmp_spectrum_creator()
+    cal_ratio()
 
 if __name__ == '__main__':
     main()
