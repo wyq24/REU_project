@@ -114,7 +114,7 @@ def make_time_dic_10s(workdir=None, radio_dir=None, kw2=None, start_timeindex=No
     radio_sequence=[]
     for i in range(radio_start_time,radio_end_time):
         # radio_list = makelist(tdir=radio_dir, keyword1='slf_final_XX_t' + str(i) + '_T', keyword2=kw2)
-        if i-radio_start_time < 2: continue
+        #if i-radio_start_time < 2: continue
         radio_list = []
         for spwi in range(50):
             #print(i, spwi)
@@ -160,13 +160,14 @@ def make_time_dic_10s(workdir=None, radio_dir=None, kw2=None, start_timeindex=No
         #     print(dafile_list[datindex][dacur_min])
         #if cjdi in range(radio_start_time,radio_end_time):
             #notice!!!! only for 20220511
-        if cjdi in range(radio_start_time+2, radio_end_time):
-            time_dic['radio_sbs'] = radio_sequence[cjdi-(radio_start_time+2)]
+        if cjdi in range(radio_start_time, radio_end_time):
+            time_dic['radio_sbs'] = radio_sequence[cjdi-(radio_start_time)]
         else:
             time_dic['radio_sbs'] ='None'
         dic_list.append(time_dic)
 
-    pickle.dump(dic_list, open('/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p', 'wb'))
+    #pickle.dump(dic_list, open('/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p', 'wb'))
+    pickle.dump(dic_list, open('/Volumes/Data/20170820/20220511/info/20220511_10s_subed.p', 'wb'))
     # pickle.dump(dic_list, open('/home/walter/Downloads/From_NJIT/20191004_1s.p', 'wb'))
     return dic_list
 

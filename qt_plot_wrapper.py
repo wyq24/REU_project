@@ -47,7 +47,8 @@ import time, datetime
 import matplotlib.pyplot as plt
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled'
-visibility_data = '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/playground/IDB20220511_1830_1840_sub_1805_1808.ms.XXYY.slfcaled'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/playground/IDB20220511_1830_1840_sub_1805_1808.ms.XXYY.slfcaled'
+visibility_data = '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/msdata/IDB20220511_1850_1900_sub_1805_1808.ms.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_data/msdata/IDB20220511_1830-1850.ms'
 #specfile = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled.dspec.npz'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms'
@@ -68,7 +69,7 @@ import time
 # bl = '4&9' means selecting a baseline from Antenna ID 4 (Antenna Name "eo05") correlating with Antenna ID 9 (Antenna Name "eo10") - c.f., listobs outputs.
 # you can also use the "bl" parameter to select multiple baseline(s), i.e., bl='0&2;4&9;8&11'.
 specfile = visibility_data + '.dspec.npz'
-d = ds.Dspec(visibility_data, bl='3&10', specfile=specfile)
+d = ds.Dspec(visibility_data, bl='3&9', specfile=specfile)
 d.plot(vmin=0.0, vmax=300, pol='XX')
 print(d.data.shape) # npol, nbl, nfreq, ntime
 

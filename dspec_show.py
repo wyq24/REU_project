@@ -307,6 +307,7 @@ def cal_ratio():
     axs.set_ylim([0.0,3.0])
     #ep.axes_helper(cax=axs, ylabel='EOVSA_tp/img_integed', xlabel='Freq_GHz')
     print(sratio)
+    print(ratio)
     plt.show()
 def verify_std(ctim=0):
     cmap = plt.cm.Spectral

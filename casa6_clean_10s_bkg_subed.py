@@ -184,7 +184,8 @@ for t in range(300):
     #if t>=40 and t<45:
     #if t>=144:
     #if t>=150:
-    if not os.path.exists(slfcaledms_) and t in [36,141]:
+    #if not os.path.exists(slfcaledms_) and t in [46,131]:
+    if not os.path.exists(slfcaledms_) and t >=60 and t<120:
         print(slfcaledms_+' no file found')
         split(vis=refms_slfcaled[slfed_ms_index],outputvis=slfcaledms_,datacolumn='data',timerange=trange,correlation='')
     slfcaledms_a.append(slfcaledms_)
@@ -195,8 +196,8 @@ if doclean_slfcaled:
     #if os.path.exists(workdir+'slfcal/masks_a.p'):
     #    masks_a=pickle.load(open(workdir+'slfcal/masks_a.p','rb'))
     for t,trange in enumerate(tranges):
-        if not t in [36,141]: continue
-        #if t<40 or t>44: continue
+        #if not t in [46,131]: continue
+        if t<60 or t>=120: continue
         #if t<90 or t>94: continue
         #if t<0 or t>2: continue
         #if t< 40 or t >=45: continue

@@ -7,7 +7,8 @@ def fits_wrap_spwX(inp_time, high_tres=False, custom_fits_list=None):
     with open('/Volumes/Data/20170820/20220511/info/cfreqs.p', 'rb') as fcfreq:
         cfreq = pickle.load(fcfreq, encoding='latin1')
     fcfreq.close()
-    cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p'
+    #cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p'
+    cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_subed.p'
     in_dic_file = open(cur_dic, 'rb')
     in_dic = pickle.load(in_dic_file)
     in_dic_file.close()
@@ -16,7 +17,7 @@ def fits_wrap_spwX(inp_time, high_tres=False, custom_fits_list=None):
         custom_list = glob.glob(
             #'/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
                 '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
-            inp_time))
+            inp_time-36))
         print(custom_list)
         fitsfiles = custom_list
         print(fitsfiles)
@@ -61,7 +62,8 @@ def fits_wrap_spwX(inp_time, high_tres=False, custom_fits_list=None):
     print('wrapped fits writed to ' + outfitsfile)
     return
 def main():
-    fits_wrap_spwX(inp_time=109)
+    fits_wrap_spwX(inp_time=73)
+    fits_wrap_spwX(inp_time=72)
 
 if __name__ == '__main__':
     main()
