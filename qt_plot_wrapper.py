@@ -45,10 +45,9 @@ print('Wall time of this cell: {}. Elapsed time since the beginning {}:'.format(
 
 import time, datetime
 import matplotlib.pyplot as plt
-#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
+visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/playground/IDB20220511_1830_1840_sub_1805_1808.ms.XXYY.slfcaled'
-visibility_data = '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/msdata/IDB20220511_1850_1900_sub_1805_1808.ms.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_data/msdata/IDB20220511_1830-1850.ms'
 #specfile = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled.dspec.npz'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms'
@@ -61,7 +60,10 @@ from suncasa.utils.mstools import time2filename
 ## If not provided, the program will generate a new one from the visibility.
 ## set the time interval
 #timerange = '18:40:25~18:40:45'
-timerange = '18:30:00~18:30:20'
+#timerange = '18:30:00~18:30:20'
+#timerange = '18:45:00~18:45:20'
+#timerange = '18:36:25~18:36:50'
+timerange = '18:46:50~18:47:00'
 #t0 = time.time()
 from suncasa import dspec as ds
 import time
@@ -69,8 +71,8 @@ import time
 # bl = '4&9' means selecting a baseline from Antenna ID 4 (Antenna Name "eo05") correlating with Antenna ID 9 (Antenna Name "eo10") - c.f., listobs outputs.
 # you can also use the "bl" parameter to select multiple baseline(s), i.e., bl='0&2;4&9;8&11'.
 specfile = visibility_data + '.dspec.npz'
-d = ds.Dspec(visibility_data, bl='3&9', specfile=specfile)
-d.plot(vmin=0.0, vmax=300, pol='XX')
+d = ds.Dspec(visibility_data, bl='3&8', specfile=specfile)
+d.plot(vmin=0.0, vmax=100, pol='XX')
 print(d.data.shape) # npol, nbl, nfreq, ntime
 
 #t_exec = time.time()-t0
@@ -106,7 +108,7 @@ ql.qlookplot(vis=visibility_data, specfile=specfile, timerange=timerange,
              spw=spw, stokes=stokes, plotaia=plotaia, aiawave=aiawave,
              restoringbeam=['50arcsec'], robust = 0.5, acmap=acmap,
              imsize=imsize,cell=cell,xycen=xycen,fov=fov,
-             outfits=outfits,overwrite=False,clevels=[0.2,1,2])
+             outfits=outfits,overwrite=False,clevels=[0.4,1,2])
 
 t_exec = time.time()-t0
 t_elapsed += t_exec
