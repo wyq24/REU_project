@@ -8,6 +8,7 @@ import numpy as np
 import pickle
 from astropy.time import Time
 import copy
+import matplotlib.colors as colors
 
 from astropy.io import fits
 from scipy.signal import savgol_filter
@@ -28,14 +29,14 @@ def tmp_spectrum_creator():
     fcfreq.close()
     #cfov = [[865,-408],[1070,-174]]
     #cfov = [[913,-288],[961,-232]]
-    fov_list = [[[862, -374], [1066 ,-176]], [[909, -349], [989, -223]], [[909, -345], [972, -226]],
-                [[910, -298], [957, -235]], [[910, -295], [952, -243]]]
+    #fov_list = [[[862, -374], [1066 ,-176]], [[909, -349], [989, -223]], [[909, -345], [972, -226]],
+    #            [[910, -298], [957, -235]], [[910, -295], [952, -243]]]
     fov_list = [[[822, -414], [1106 ,-136]], [[879, -379], [1019, -193]], [[909, -345], [972, -226]],
                 [[910, -298], [957, -235]], [[910, -295], [952, -243]]]
-    p_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled/',keyword1='_t41_'
+    p_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/slfcal/images_slfcaled/',keyword1='_t43_'
                       , keyword2='fits')
     p_list.sort()
-    b_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled/',keyword1='_t146_'
+    b_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/background/slfcal/images_slfcaled/',keyword1='_t2_'
                       , keyword2='fits')
     b_list.sort()
     print(p_list)
@@ -44,13 +45,18 @@ def tmp_spectrum_creator():
     b_arr = np.zeros((50))
     for spwi in range(50):
         findex = min(int(math.floor(spwi/5)),4)
-        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(p_list[spwi]), fov=fov_list[findex])
+        cfov = fov_list[findex]
+        # cfov = fov_list[0]
+        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(p_list[spwi]), fov=cfov)
         new_sum_data = cur_sub_map.data
         old_sum = np.nansum(new_sum_data.clip(min=0.0))
         cur_sfu = pt.test_convertion(tb=old_sum, pix=2.0, bmmin=bmsize[spwi], freq=cfreq[spwi], switch='tb2sfu')
         p_arr[spwi] = cur_sfu
     for spwi in range(50):
-        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(b_list[spwi]), fov=fov_list[min(int(math.floor(spwi/5)),4)])
+        findex = min(int(math.floor(spwi/5)),4)
+        cfov = fov_list[findex]
+        # cfov = fov_list[0]
+        cur_sub_map = pt.make_sub_map(cur_map=smap.Map(b_list[spwi]), fov=cfov)
         new_sum_data = cur_sub_map.data
         old_sum = np.nansum(new_sum_data.clip(min=0.0))
         cur_sfu = pt.test_convertion(tb=old_sum, pix=2.0, bmmin=bmsize[spwi], freq=cfreq[spwi], switch='tb2sfu')
@@ -156,7 +162,7 @@ def cali_tp_spectrum():
     #timerange1=['2017-07-15 18:52:00','2017-07-15 19:10:00']
     #-------for 1s in_dic----------
     #timerange2=['2017-07-03 16:13:46','2017-07-03 16:13:50']
-    timerange1=['2022-05-11 18:59:40','2022-05-11 18:59:50']
+    timerange1=['2022-05-11 18:03:40','2022-05-11 18:03:50']
     #timerange2=['2017-07-03 16:13:26','2017-07-03 16:13:33']
     #timerange2=['2017-07-15 19:31:07','2017-07-15 19:31:17']
     #timerange2=['2017-07-15 19:50:00','2017-07-15 20:00:00']
@@ -378,11 +384,124 @@ def dip_ratio():
     ep.axes_helper(cax=ax,ti_di=['in', 'in'],ylabel='Ratio _FluxDensity',xlabel='Frequency [Hz]')
     ax.legend()
     plt.show()
+
+def tp_lightcurve():
+    cfits = '/Volumes/Data/20170820/20220511/eovsa/EOVSA_TPall_20220511.fts'
+    hdul = fits.open(cfits, mode='readonly')
+    dfreq = copy.deepcopy(hdul[1].data)
+    ds_data = copy.deepcopy(hdul[0].data)
+    ds_time = copy.deepcopy(hdul[2].data)
+    hdul.close()
+    cmap = plt.cm.Spectral
+    cnorm = mpl.colors.Normalize(vmin=0, vmax=50)
+
+    timerange2 = ['2022-05-11 17:02:00', '2022-05-11 19:50:00']
+    #timerange1 = ['2022-05-11 18:01:20', '2022-05-11 18:01:40']
+    #timerange1 = ['2022-05-11 19:25:30', '2022-05-11 19:25:40']
+    timerange1 = ['2022-05-11 17:54:00', '2022-05-11 17:55:00']
+    tr_plt1 = Time(timerange1)
+    tr_plt2 = Time(timerange2)
+    mjd_list = []
+    for cds_t in ds_time:
+        tc1 = cds_t[0]
+        tc2 = cds_t[1] / 1000. / 8640. * 0.1
+        mjd_list.append(tc1 * 1.0 + tc2 * 1.0)
+    spec_tim = Time(mjd_list, format='mjd')
+    tidx_spec1, = np.where((spec_tim >= tr_plt1[0]) & (spec_tim <= tr_plt1[1]))
+    tidx_spec2, = np.where((spec_tim >= tr_plt2[0]) & (spec_tim <= tr_plt2[1]))
+    print(tidx_spec1)
+    #spw_list = [5,10,15,20,25,30,35]
+    #spw_list = [15,25]
+    spw_list = [5, 15, 25, 35]
+    fig, axs = plt.subplots(nrows=len(spw_list), ncols=1, sharex=True, figsize=(4, 6))
+    #fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
+    for ispw, cspw in enumerate(spw_list):
+        #axs[0].plot(dfreq.astype(float)[:], np.mean(ds_data[:, tidx_spec1[0]:tidx_spec1[1]], axis=1), label='background')
+        #axs[0].plot(dfreq.astype(float)[:], np.mean(ds_data[:, tidx_spec2[0]:tidx_spec2[1]], axis=1), label='flare peak')
+        ori_dspec = np.mean(ds_data[:, tidx_spec1[0]:tidx_spec1[-1]],axis=1)
+        sig_dspec = ds_data[:, tidx_spec2[0]:tidx_spec2[-1]]
+        bkg_dspec = np.repeat(ori_dspec[:, np.newaxis], tidx_spec2[-1] - tidx_spec2[0], axis=1)
+        # axs[0].plot(np.arange(134),np.mean(ds_data[:,tidx_spec2[0]:tidx_spec2[1]],axis=1),label='flare peak')
+        # axs[1].plot(np.arange(134),np.median(ds_data[:,tidx_spec2[0]:tidx_spec2[1]],axis=1)-np.median(ds_data[:,tidx_spec1[0]:tidx_spec1[1]],axis=1),label='bkg_subtracted_flare_peak')
+        subed_sig = np.subtract(sig_dspec,bkg_dspec)
+        # axs[1].plot(dfreq.astype(float)[:],np.subtract(np.max(ds_data[:,tidx_spec2[0]:tidx_spec2[1]],axis=1),np.mean(ds_data[:,tidx_spec1[0]:tidx_spec1[1]],axis=1)),label='bkg_subtracted_flare_peak')
+        #axs[1].plot(subed_sig[0,:], subed_sig[ispw,:],
+        plotted_dspec = copy.deepcopy(subed_sig[cspw, :])
+        plotted_dspec = savgol_filter(plotted_dspec, 7, 3)
+        axs[ispw].plot_date(Time(mjd_list[tidx_spec2[0]:tidx_spec2[-1]], format='mjd').plot_date, plotted_dspec,label='bkg_subtracted_flare_peak',marker='',linestyle='-')
+        #axs.plot_date(Time(mjd_list[tidx_spec2[0]:tidx_spec2[-1]], format='mjd').plot_date, plotted_dspec,label='bkg_subtracted_flare_peak',marker='',linestyle='-',color=cmap(cnorm(ispw)))
+        #axs[ispw].plot_date(Time(mjd_list[tidx_spec2[0]:tidx_spec2[-1]], format='mjd').plot_date, sig_dspec[cspw,:],label='original signal',marker='',linestyle='-')
+        #axs[1].plot_date(Time(mjd_list[tidx_spec2[0]:tidx_spec2[-1]], format='mjd').plot_date, sig_dspec[ispw, :],label='bkg_subtracted_flare_peak')
+        # axs[1].plot(dfreq.astype(float)[:],np.subtract(np.median(ds_data[:,tidx_spec2[0]:tidx_spec2[1]],axis=1),np.median(ds_data[:,tidx_spec1[0]:tidx_spec1[1]],axis=1)),label='bkg_subtracted_flare_peak')
+        #axs[0].legend()
+        #axs[ispw].legend()
+        axs[ispw].set_ylim([-5,55])
+        #axs[ispw].legend()
+        #axs.set_ylim([-5,55])
+    # axs[0].set_ylim([-1, 7])
+    # ep.axes_helper(cax=axs[0],ylabel='FD[sfu]')
+    # ep.axes_helper(cax=axs[1],ylabel='FD[sfu]',xlabel='Freq_GHz')
+    # print(np.median(ds_data[:,tidx_spec1[0]:tidx_spec1[1]],axis=1))
+    # axs.set_ylim([55.,560.])
+    fig.suptitle('EOVSA_TP')
+    plt.show()
+    #return (np.subtract(np.max(ds_data[:, tidx_spec2[0]:tidx_spec2[1]], axis=1),
+    #                    np.mean(ds_data[:, tidx_spec1[0]:tidx_spec1[1]], axis=1)), dfreq.astype(float)[:])
+
+def TP_dynamic_spectrum():
+    cfits = '/Volumes/Data/20170820/20220511/eovsa/EOVSA_TPall_20220511.fts'
+    hdul = fits.open(cfits, mode='readonly')
+    dfreq = copy.deepcopy(hdul[1].data)
+    ds_data = copy.deepcopy(hdul[0].data)
+    ds_time = copy.deepcopy(hdul[2].data)
+    hdul.close()
+    cmap = plt.cm.Spectral
+    cnorm = mpl.colors.Normalize(vmin=0, vmax=50)
+
+    #timerange2 = ['2022-05-11 17:02:00', '2022-05-11 19:59:00']
+    timerange2 = ['2022-05-11 18:00:00', '2022-05-11 21:00:00']
+    #timerange1 = ['2022-05-11 18:01:20', '2022-05-11 18:01:30']
+    timerange1 = ['2022-05-11 17:54:00', '2022-05-11 17:55:00']
+    tr_plt1 = Time(timerange1)
+    tr_plt2 = Time(timerange2)
+    mjd_list = []
+    for cds_t in ds_time:
+        tc1 = cds_t[0]
+        tc2 = cds_t[1] / 1000. / 8640. * 0.1
+        mjd_list.append(tc1 * 1.0 + tc2 * 1.0)
+    spec_tim = Time(mjd_list, format='mjd')
+    tidx_spec1, = np.where((spec_tim >= tr_plt1[0]) & (spec_tim <= tr_plt1[1]))
+    tidx_spec2, = np.where((spec_tim >= tr_plt2[0]) & (spec_tim <= tr_plt2[1]))
+    print(tidx_spec1)
+    #spw_list = [5,10,15,20,25,30,35]
+    #spw_list = [5,15,20,25]
+    #fig, axs = plt.subplots(nrows=len(spw_list), ncols=1, sharex=True, figsize=(4, 6))
+    fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
+    #axs[0].plot(dfreq.astype(float)[:], np.mean(ds_data[:, tidx_spec1[0]:tidx_spec1[1]], axis=1), label='background')
+    #axs[0].plot(dfreq.astype(float)[:], np.mean(ds_data[:, tidx_spec2[0]:tidx_spec2[1]], axis=1), label='flare peak')
+    ori_dspec = np.mean(ds_data[:, tidx_spec1[0]:tidx_spec1[-1]],axis=1)
+    sig_dspec = ds_data[:, tidx_spec2[0]:tidx_spec2[-1]]
+    bkg_dspec = np.repeat(ori_dspec[:, np.newaxis], tidx_spec2[-1] - tidx_spec2[0], axis=1)
+    #print(bkg_dspec[:,0])
+    subed_sig = np.subtract(sig_dspec,bkg_dspec)
+    cur_tim_axes = Time(mjd_list[tidx_spec2[0]:tidx_spec2[-1]],format = 'mjd').plot_date
+    #axs.pcolormesh(cur_tim_axes, np.array(dfreq['sfreq']), subed_sig, cmap='Spectral', vmin=0.0, vmax=100.0)
+    #axs.pcolormesh(cur_tim_axes, np.array(dfreq['sfreq']), subed_sig, cmap='Spectral', norm=colors.LogNorm(vmin=1.0, vmax=100.0))
+    axs.pcolormesh(cur_tim_axes, np.array(dfreq['sfreq']), subed_sig, cmap='gist_gray', norm=colors.LogNorm(vmin=1.0, vmax=100.0))
+    axs.xaxis_date()
+    fig.suptitle('EOVSA_TP')
+    plt.show()
+    #return (np.subtract(np.max(ds_data[:, tidx_spec2[0]:tidx_spec2[1]], axis=1),
+    #                    np.mean(ds_data[:, tidx_spec1[0]:tidx_spec1[1]], axis=1)), dfreq.astype(float)[:])
+
+
 def main():
     #spatial_dspec_minus()
     #cali_tp_spectrum()
     #tmp_spectrum_creator()
-    cal_ratio()
+    #cal_ratio()
+    tp_lightcurve()
+    #TP_dynamic_spectrum()
 
 if __name__ == '__main__':
     main()

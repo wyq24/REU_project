@@ -15,7 +15,7 @@ def make_time_dic_10s(workdir=None, radio_dir=None, kw2=None, start_timeindex=No
         #init_time = '2017-07-03T16:12:40.002'
         #init_time = '2017-07-03T16:00:00.002'
         #init_time = '2017-07-03T15:56:30.002'
-        init_time = '2022-05-11T18:30:00.002'
+        init_time = '2022-05-11T18:00:00.002'
         time_interval = 10.0
         tranges = []
         tname = []
@@ -167,7 +167,7 @@ def make_time_dic_10s(workdir=None, radio_dir=None, kw2=None, start_timeindex=No
         dic_list.append(time_dic)
 
     #pickle.dump(dic_list, open('/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p', 'wb'))
-    pickle.dump(dic_list, open('/Volumes/Data/20170820/20220511/info/20220511_10s_subed.p', 'wb'))
+    pickle.dump(dic_list, open('/Volumes/Data/20170820/20220511/info/20220511_10s_long.p', 'wb'))
     # pickle.dump(dic_list, open('/home/walter/Downloads/From_NJIT/20191004_1s.p', 'wb'))
     return dic_list
 

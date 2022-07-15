@@ -37,17 +37,18 @@ from astropy.time import Time,TimeDelta
 #       10.        , 10.        , 10.        , 10.        , 10.        ,
 #       10.        , 10.        , 10.        , 10.        , 10.        ]
 #task handles
-dofullsun=0
+dofullsun=1
 domasks=0
 doslfcal=0
-doapply=1
+doapply=0
 dofinalclean=0 #final clean of the slfcaled data for the selected slfcal time only
 doclean_slfcaled=0 #final clean of all the slfcaled data
 
 #workdir='/Volumes/Data/20170906/msdata/2021_new_calibration/'
 #workdir='/Volumes/WD6T/working/eovsa_events/20170703/'
 #workdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/'
-workdir='/Volumes/WD6T/working/20220511/eovsa_full_corr/'
+#workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/'
+workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/'
 #workdir='/Volumes/WD6T/working/eovsa_full_disk/'
 imagedir=workdir+'slfcal/images/'
 maskdir=workdir+'slfcal/masks/'
@@ -86,10 +87,11 @@ if not os.path.exists(refms_slfcal_XXYY):
 #tranges=['2017/09/06/19:24:00~2017/09/06/19:24:10']
 #tranges=['2017/07/15/19:32:10~2017/07/15/19:32:16']
 #tranges=['2021/05/08/18:38:18~2021/05/08/18:38:24']
-tranges=['2022/05/11/18:40:36~2022/05/11/18:40:40']
+#tranges=['2022/05/11/18:42:13~2022/05/11/18:42:17']
+tranges=['2022/05/11/19:29:00~2022/05/11/19:29:30']
 #tranges=['2021/05/08/18:43:25~2021/05/08/18:43:35']
-start_time = Time('2022-05-11 18:40:36',format='iso')
-end_time = Time('2022-05-11 18:40:40',format='iso')
+start_time = Time('2022-05-11 18:42:13',format='iso')
+end_time = Time('2022-05-11 18:42:17',format='iso')
 #find the phasecenter
 midtime_mjd = (start_time.mjd + end_time.mjd) / 2.
 eph = hf.read_horizons(t0=Time(midtime_mjd, format='mjd'))
@@ -105,7 +107,10 @@ tb.close()
 #ms.close()
 ra0 = phadir[0]
 dec0 = phadir[1]
-xycen=[912.0,-295.0]
+#xycen=[912.0,-295.0]
+#xycen=[920.0,-200.0]
+xycen=[0.0,0.0]
+#xycen=[912.0,-295.0]
 x0 = np.radians(xycen[0] / 3600.)
 y0 = np.radians(xycen[1] / 3600.)
 p0 = np.radians(eph['p0'][0])  # p angle in radians
@@ -151,12 +156,12 @@ n_spw_per_mask = 5
 #cphacenter='J2000 0.000rad 0.000rad'
 #xran=[500,700]
 #yran=[-350,-150]
-xran=[850,1100]
-yran=[-200,-400]
+#xran=[620,1220]
+#yran=[100,-500]
 
 #spws=[str(s+1) for s in range(len(cfreqs))]
 spws=[str(s) for s in range(len(cfreqs))]
-antennas='!9;!4'
+antennas='!4'
 nround=3 #number of slfcal cycles
 
 subms_a=[]
@@ -164,9 +169,9 @@ slfcalms_a=[]
 slfcaledms_a=[]
 
 for t,trange in enumerate(tranges):
-    subms_ =      workdir+'slfcal/IDB20220511_1840_36_40.ms.t{0:d}.slfcal'.format(t)
-    slfcalms_ =   workdir+'slfcal/IDB20220511_1840_36_40.ms.t{0:d}.XXYY.slfcal'.format(t)
-    slfcaledms_ = workdir+'slfcal/IDB20220511_1840_36_40.ms.t{0:d}.XXYY.slfcaled'.format(t)
+    subms_ =      workdir+'slfcal/IDB20220511_1842_11_17.ms.t{0:d}.slfcal'.format(t)
+    slfcalms_ =   workdir+'slfcal/IDB20220511_1842_11_17.ms.t{0:d}.XXYY.slfcal'.format(t)
+    slfcaledms_ = workdir+'slfcal/IDB20220511_1842_11_17.ms.t{0:d}.XXYY.slfcaled'.format(t)
     if not os.path.exists(slfcalms_):
         split(vis=refms,outputvis=slfcalms_,datacolumn='data',timerange=trange,correlation='XX,YY')
     if not os.path.exists(subms_):
@@ -175,6 +180,44 @@ for t,trange in enumerate(tranges):
     subms_a.append(subms_)
     slfcaledms_a.append(slfcaledms_)
 print('HERE WE ARE!')
+# =========== Step 1, doing a full-Sun image to find out phasecenter and appropriate field of view =========
+if dofullsun:
+    #initial mfs clean to find out the image phase center
+    im_init='fullsun_init_0_15'
+    os.system('rm -rf '+im_init+'*')
+    tclean(vis=slfcalms_a[0],
+            antenna=antennas,
+            imagename=im_init,
+            spw='0~15',
+            specmode='mfs',
+            timerange=trange,
+            imsize=[512],
+            cell=['2arcsec'],
+            niter=1000,
+            gain=0.05,
+            stokes='I',
+            restoringbeam=['30arcsec'],
+            interactive=False,
+            pbcor=True)
+
+    hf.imreg(vis=slfcalms_a[0],imagefile=im_init+'.image.pbcor',fitsfile=im_init+'.fits',
+             timerange=trange,usephacenter=False,verbose=True)
+    clnjunks = ['.flux', '.mask', '.model', '.psf', '.residual','.sumwt','.pb','.image']
+    for clnjunk in clnjunks:
+        if os.path.exists(im_init + clnjunk):
+            os.system('rm -rf '+im_init + clnjunk)
+
+    from sunpy import map as smap
+    from matplotlib import pyplot as plt
+    fig = plt.figure(figsize=(6,6))
+    ax = fig.add_subplot(111)
+    eomap=smap.Map(im_init+'.fits')
+    #eomap.data=eomap.data.reshape((npix,npix))
+    eomap.plot_settings['cmap'] = plt.get_cmap('jet')
+    eomap.plot(axes = ax)
+    eomap.draw_limb()
+    plt.show()
+    viewer(im_init+'.image.pbcor')
 masks_a=[]
 if domasks:
     for t,trange in enumerate(tranges):
@@ -184,7 +227,7 @@ if domasks:
         #subms = subms_a[t]
         #clearcal(subms)
         #delmod(subms)
-        antennas='0~12' 
+        antennas=antennas,
         pol='XX'
         calprefix=caltbdir+'slf_t{0:d}'.format(t)
         imgprefix=maskdir+'slf_t{0:d}'.format(t)
@@ -194,11 +237,13 @@ if domasks:
         os.system('rm -rf '+img_init+'*')
         spwrans=[]
         bmrans=[]
-        for nmi in range(int(len(cfreqs)/n_spw_per_mask)):
-            #spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask+1, (nmi+1)*n_spw_per_mask))
-            spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask, (nmi+1)*n_spw_per_mask-1))
-            #bmrans.append(str(ebmsize[nmi*n_spw_per_mask+1]))
-            bmrans.append(str(ebmsize[nmi * n_spw_per_mask]))
+        spwrans = ['0~1','2~4', '5~9', '10~14', '15~19', '20~24', '25~29', '30~34', '35~39', '40~44', '45~49']
+        bmrans = ['50.7arcsec','25.3arcsec', '18.1arcsec', '12.4arcsec', '9.4arcsec', '7.6arcsec', '6.4arcsec', '5.5arcsec', '4.8arcsec', '4.3arcsec', '4.0arcsec']
+        # for nmi in range(int(len(cfreqs)/n_spw_per_mask)):
+        #     #spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask+1, (nmi+1)*n_spw_per_mask))
+        #     spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask, (nmi+1)*n_spw_per_mask-1))
+        #     #bmrans.append(str(ebmsize[nmi*n_spw_per_mask+1]))
+        #     bmrans.append(str(ebmsize[nmi * n_spw_per_mask]))
         #spwrans[0] = '4'
         print('ranges are:' , spwrans, bmrans)
         #spwrans=['1~5','6~12','13~20','21~30']
@@ -214,7 +259,7 @@ if domasks:
             try:
                 tclean(vis=slfcalms,
                 #tclean(vis=subms,
-                        antenna='0~12',
+                        antenna='!4',
                         imagename=imname,
                         spw=spwran,
                         #spw=cspw,
@@ -224,13 +269,14 @@ if domasks:
                         #psfmode='clark',
                         #imsize=[256],
                         imsize=[512],
-                        cell=['1arcsec'],
+                        #cell=['1.2arcsec'],
+                        cell=['5arcsec'],
                         niter=1000,
                         gain=0.05,
                         stokes='XX',
-                        #restoringbeam=['20arcsec'],
+                        restoringbeam=['30arcsec'],
                         #restoringbeam=[bmrans[spwri]+'arcsec'],
-                        restoringbeam=[bmrans[spwri]],
+                        #restoringbeam=[bmrans[spwri]],
                         #restoringbeam=['{}arcsec'.format(int(ebmsize[int(cspw)-int(1)]))],
                         #restoringbeam=['{}arcsec'.format(int(bmrans[spwri]))],
                         phasecenter=phasecenter,
@@ -264,6 +310,7 @@ if doslfcal:
     if os.path.exists(workdir+'slfcal/masks_a.p'):
         masks_a=pickle.load(open(workdir+'slfcal/masks_a.p','rb'))
     os.system('rm -rf '+imagedir+'*')
+    os.system('rm -rf '+caltbdir+'*')
     #first step: make a mock caltable for the entire database
     slftbs_a=[]
     for t,trange in enumerate(tranges):
@@ -284,18 +331,20 @@ if doslfcal:
         strtmp=[m.replace(':','') for m in trange.split('~')]
         timestr='t'+strtmp[0]+'-'+strtmp[1]
         refantenna='0'
-        niters=[100,300,500]
+        niters=[150,300,500]
         robusts=[1.0,0.5,0.0]
         doapplycal=[1,1,1]
         calmodes=['p','p','a']
         uvranges=['','','']
         spwrans=[]
         bmrans=[]
-        for nmi in range(int(len(cfreqs)/n_spw_per_mask)):
-            #spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask+1, (nmi+1)*n_spw_per_mask))
-            spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask, (nmi+1)*n_spw_per_mask-1))
-            #bmrans.append(str(ebmsize[nmi*n_spw_per_mask+1]))
-            bmrans.append(str(ebmsize[nmi * n_spw_per_mask]))
+        spwrans = ['0~1','2~4', '5~9', '10~14', '15~19', '20~24', '25~29', '30~34', '35~39', '40~44', '45~49']
+        bmrans = ['50.7arcsec','25.3arcsec', '18.1arcsec', '12.4arcsec', '9.4arcsec', '7.6arcsec', '6.4arcsec', '5.5arcsec', '4.8arcsec', '4.3arcsec', '4.0arcsec']
+        # for nmi in range(int(len(cfreqs)/n_spw_per_mask)):
+        #     #spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask+1, (nmi+1)*n_spw_per_mask))
+        #     spwrans.append('{0}~{1}'.format(nmi*n_spw_per_mask, (nmi+1)*n_spw_per_mask-1))
+        #     #bmrans.append(str(ebmsize[nmi*n_spw_per_mask+1]))
+        #     bmrans.append(str(ebmsize[nmi * n_spw_per_mask]))
         #spwrans[0] = '2~5'
         #spwrans=['1~5','6~12','13~20','21~30']
         for n in range(nround):
@@ -318,19 +367,25 @@ if doslfcal:
                         #spbg=max(int(sp)-2,1)
                     #    spbg=max(int(sp)-2,0)
                     #    sped=min(int(sp)+2,len(cfreqs)-1)
-                    if s < 0:
+                    if s < 2:
                     #if s < 3:
-                        spwran='3'
+                        spwran='0~1'
                     else:
                         #spbg=max(int(sp)-2,1)
                         #spbg=max(int(sp)-2,0)
-                        spbg = max(int(sp) - 2, 0)
+                        spbg = max(int(sp) - 3, 2)
                         #spbg=max(int(sp)-2,4)
-                        sped=min(int(sp)+2,len(cfreqs)-1)
+                        sped=min(int(sp)+3,len(cfreqs)-1)
                         spwran=str(spbg)+'~'+str(sped)
                     #spwran=str(spbg)+'~'+str(sped)
                     print('The current spw is: ', spwran)
-                    mask = masks[int(s/5)]
+                    if s <5:
+                        mask = masks[1]
+                        if s < 2:
+                            mask = masks[0]
+                    else:
+                        mask = masks[int(s/5)+1]
+                    #mask = masks[int(s / 5)]
                     '''
                     if int(sp) < 5:
                         mask = masks[0]
@@ -351,7 +406,13 @@ if doslfcal:
                         spwran = sp
                     #if int(spwran) < 2:
                     #    spwran = '2'
-                    mask = masks[int(s / 5)]
+                    if s <5:
+                        mask = masks[1]
+                        if s < 2:
+                            mask = masks[0]
+                    else:
+                        mask = masks[int(s/5)+1]
+                    #mask = masks[int(s / 5)]
                     '''
                     if int(sp) < 5:
                         mask = masks[0]
@@ -392,7 +453,11 @@ if doslfcal:
                             pbcor=False,
                             interactive=False)
                     '''
-                    tclean(vis=slfcalms,
+                    if n==0 and s<=11:
+                        ntry=0
+                        while True:
+                            ntry+=1
+                            tclean(vis=slfcalms,
                             antenna=antennas,
                             imagename=slfcal_img,
                             uvrange=uvranges[n],
@@ -405,7 +470,7 @@ if doslfcal:
                             #psfmode='clark',
                             imsize=[512],
                             #imsize=[512,512],
-                            cell=['2arcsec'],
+                            cell=['5arcsec'],
                             niter=niters[n],
                             gain=0.05,
                             #stokes='I',
@@ -422,14 +487,70 @@ if doslfcal:
                             interactive=False,
                             #usescratch=True,
                             savemodel='modelcolumn')
-                    if os.path.exists(slfcal_img+'.image'):
-                        fitsfile=slfcal_img+'.fits'
-                        hf.imreg(vis=slfcalms,imagefile=slfcal_img+'.image',fitsfile=fitsfile,
-                                 timerange=trange,usephacenter=False,toTb=True,verbose=False,overwrite=True)
-                    clnjunks = ['.mask','.flux', '.model', '.psf', '.residual', '.image']
-                    for clnjunk in clnjunks:
-                        if os.path.exists(slfcal_img + clnjunk):
-                            shutil.rmtree(slfcal_img + clnjunk)
+                            cur_header_refcal = imhead(slfcal_img+'.image')['refval']
+                            print('have already try {} times'.format(ntry))
+                            if np.max(abs(cur_header_refcal)) < 1.e11 and cur_header_refcal[-1] > 1.e2:
+                               break
+                            if n==0:
+                                os.system('rm -rf ' + slfcal_img + '*')
+                                #clearcal(slfcalms)
+                                #os.system('rm -rf ' + caltbdir + '*')
+                                time.sleep(1.0)
+                                # if not os.path.exists(caltbdir):
+                                #     os.makedirs(caltbdir)
+                                # if not os.path.exists(imagedir):
+                                #     os.makedirs(imagedir)
+                        if os.path.exists(slfcal_img+'.image'):
+                                    fitsfile=slfcal_img+'.fits'
+                                    hf.imreg(vis=slfcalms,imagefile=slfcal_img+'.image',fitsfile=fitsfile,
+                                     timerange=trange,usephacenter=False,toTb=True,verbose=False,overwrite=True)
+                        print('NAILED IT')
+                        #clnjunks = ['.mask','.flux', '.model', '.psf', '.residual', '.image']
+                        clnjunks = ['.mask','.flux', '.model', '.psf', '.residual']
+                        for clnjunk in clnjunks:
+                            if os.path.exists(slfcal_img + clnjunk):
+                                shutil.rmtree(slfcal_img + clnjunk)
+                    else:
+                        tclean(vis=slfcalms,
+                            antenna=antennas,
+                            imagename=slfcal_img,
+                            uvrange=uvranges[n],
+                            #spw=sp,
+                            spw=spwran,
+                            #spw='0',
+                            specmode='mfs',
+                            timerange=trange,
+                            #imagermode='csclean',
+                            #psfmode='clark',
+                            imsize=[512],
+                            #imsize=[512,512],
+                            cell=['5arcsec'],
+                            niter=niters[n],
+                            gain=0.05,
+                            #stokes='I',
+                            stokes='XX',
+                            weighting='briggs',
+                            robust=robusts[n],
+                            phasecenter=phasecenter,
+                            #mask='box [ [ 75pix , 90pix] , [205pix, 165pix ] ]',
+                            mask=mask,
+                            #restoringbeam=['{}arcsec'.format(int(ebmsize[int(s) - int(1)]))],
+                            #restoringbeam=[str(bm)+'arcsec'],
+                            restoringbeam=[bm],
+                            pbcor=False,
+                            interactive=False,
+                            #usescratch=True,
+                            savemodel='modelcolumn')
+                        if os.path.exists(slfcal_img+'.image'):
+                            fitsfile=slfcal_img+'.fits'
+                            hf.imreg(vis=slfcalms,imagefile=slfcal_img+'.image',fitsfile=fitsfile,
+                                     timerange=trange,usephacenter=False,toTb=True,verbose=False,overwrite=True)
+                        print('NAILED IT')
+                        #clnjunks = ['.mask','.flux', '.model', '.psf', '.residual', '.image']
+                        clnjunks = ['.mask','.flux', '.model', '.psf', '.residual']
+                        for clnjunk in clnjunks:
+                            if os.path.exists(slfcal_img + clnjunk):
+                                shutil.rmtree(slfcal_img + clnjunk)
                     '''
                     ax = fig.add_subplot(gs[s])
                     eomap=smap.Map(fitsfile)
@@ -479,13 +600,13 @@ if doslfcal:
             if os.path.exists(slfcal_tb_g):
                 slftbs.append(slfcal_tb_g)
                 slftb=[slfcal_tb_g]
-                # os.chdir(slfcaldir)
-                # if calmodes[n] == 'p':
-                #     plotcal(caltable=slfcal_tb_g,antenna='1~12',xaxis='freq',yaxis='phase',\
-                #             subplot=431,plotrange=[-1,-1,-180,180],iteration='antenna',figfile=slfcal_tb_g+'.png',showgui=False)
-                # if calmodes[n] == 'a':
-                #     plotcal(caltable=slfcal_tb_g,antenna='1~12',xaxis='freq',yaxis='amp',\
-                #             subplot=431,plotrange=[-1,-1,0,2.],iteration='antenna',figfile=slfcal_tb_g+'.png',showgui=False)
+                os.chdir(slfcaldir)
+                if calmodes[n] == 'p':
+                    plotcal(caltable=slfcal_tb_g,antenna='1~12',xaxis='freq',yaxis='phase',\
+                            subplot=431,plotrange=[-1,-1,-180,180],iteration='antenna',figfile=slfcal_tb_g+'.png',showgui=False)
+                if calmodes[n] == 'a':
+                    plotcal(caltable=slfcal_tb_g,antenna='1~12',xaxis='freq',yaxis='amp',\
+                            subplot=431,plotrange=[-1,-1,0,2.],iteration='antenna',figfile=slfcal_tb_g+'.png',showgui=False)
                 os.chdir(workdir)
             if doapplycal[n]:
                 clearcal(slfcalms)

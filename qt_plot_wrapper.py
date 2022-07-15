@@ -45,12 +45,19 @@ print('Wall time of this cell: {}. Elapsed time since the beginning {}:'.format(
 
 import time, datetime
 import matplotlib.pyplot as plt
-visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.slfcaled'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.slfcaled'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1700_1810/IDB20220511_1812-1814.ms'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/playground/IDB20220511_1830-1930.ms'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/IDB20220511_1800-2000.ms'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/playground/IDB20220511_1830_1840_sub_1805_1808.ms.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_data/msdata/IDB20220511_1830-1850.ms'
 #specfile = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled.dspec.npz'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms'
+visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/playground/1842_ori/IDB20220511_1842-1843.ms'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/playground/IDB20220511_1842_11_17.ms.t0.XXYY.slfcaled'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/playground/IDB20220511_1842_11_17.ms.t0.XXYY.slfcaled'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/playground/1810/IDB20220511_1810-1811.ms.slfcaled'
 #specfile = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms.dspec.npz'
 t0 = time.time()
 from suncasa.utils import qlookplot as ql
@@ -62,8 +69,10 @@ from suncasa.utils.mstools import time2filename
 #timerange = '18:40:25~18:40:45'
 #timerange = '18:30:00~18:30:20'
 #timerange = '18:45:00~18:45:20'
-#timerange = '18:36:25~18:36:50'
-timerange = '18:46:50~18:47:00'
+#timerange = '18:42:11~18:42:17'
+timerange = '18:42:00~18:42:20'
+#timerange = '18:40:36~18:40:40'
+#timerange = ''
 #t0 = time.time()
 from suncasa import dspec as ds
 import time
@@ -71,8 +80,8 @@ import time
 # bl = '4&9' means selecting a baseline from Antenna ID 4 (Antenna Name "eo05") correlating with Antenna ID 9 (Antenna Name "eo10") - c.f., listobs outputs.
 # you can also use the "bl" parameter to select multiple baseline(s), i.e., bl='0&2;4&9;8&11'.
 specfile = visibility_data + '.dspec.npz'
-d = ds.Dspec(visibility_data, bl='3&8', specfile=specfile)
-d.plot(vmin=0.0, vmax=100, pol='XX')
+d = ds.Dspec(visibility_data, bl='5&10', specfile=specfile)
+d.plot(vmin=0.0, vmax=50, pol='XX')
 print(d.data.shape) # npol, nbl, nfreq, ntime
 
 #t_exec = time.time()-t0
@@ -89,9 +98,11 @@ stokes = 'XX'
 #xycen=[912.0,-295.0]
 #xycen=[912.0,-195.0]
 xycen=[0.0,0.0]
+#xycen=[920.0,-200.0]
 ## pixel scale
 #cell=['2.0arcsec']
 cell=['5.0arcsec']
+#cell=['1.2arcsec']
 ## number of pixels in X and Y. If only one value is provided, NX = NY
 #imsize=[128]
 imsize=[512]
@@ -100,15 +111,15 @@ fov = [2460,2460]
 ## turn off AIA image plotting, default is True
 plotaia = True
 ## AIA passband in Å. The options are [171,131,304,335,211,193,94,1600,1700]
-aiawave = 131
+aiawave = 171
 ## Choose the coloar map for AIA images. If not provided, the program will use default AIA colormap.
 acmap = 'gray_r'
 
 ql.qlookplot(vis=visibility_data, specfile=specfile, timerange=timerange,
              spw=spw, stokes=stokes, plotaia=plotaia, aiawave=aiawave,
-             restoringbeam=['50arcsec'], robust = 0.5, acmap=acmap,
+             restoringbeam=['30arcsec'], robust = 0.5, acmap=acmap,
              imsize=imsize,cell=cell,xycen=xycen,fov=fov,
-             outfits=outfits,overwrite=False,clevels=[0.4,1,2])
+             outfits=outfits,overwrite=False,clevels=[0.3,1,2])
 
 t_exec = time.time()-t0
 t_elapsed += t_exec

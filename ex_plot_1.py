@@ -62,7 +62,7 @@ fbmsize.close()
 with open('/Volumes/Data/20170820/20220511/info/cfreqs.p', 'rb') as fcfreq:
     cfreq = pickle.load(fcfreq, encoding='latin1')
 fcfreq.close()
-cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p'
+cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long.p'
 in_dic_file = open(cur_dic, 'rb')
 in_dic_10s_la = pickle.load(in_dic_file)
 in_dic_file.close()
@@ -693,7 +693,7 @@ def plot_eovsa_contour(tim, ax, spws=range(50), fov=None, abs_contourf=None, lev
     #     in_dic = in_dic_1s
     # # if high_tres:
     #    in_dic = in_dic_1s
-        cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p'
+        cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long.p'
         in_dic_file = open(cur_dic, 'rb')
         in_dic = pickle.load(in_dic_file)
         in_dic_file.close()

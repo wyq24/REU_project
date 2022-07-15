@@ -8,27 +8,29 @@ def fits_wrap_spwX(inp_time, high_tres=False, custom_fits_list=None):
         cfreq = pickle.load(fcfreq, encoding='latin1')
     fcfreq.close()
     #cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p'
-    cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_subed.p'
-    in_dic_file = open(cur_dic, 'rb')
-    in_dic = pickle.load(in_dic_file)
-    in_dic_file.close()
-    fitsfiles = in_dic[inp_time]['radio_sbs']
+    # cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_subed.p'
+    # in_dic_file = open(cur_dic, 'rb')
+    # in_dic = pickle.load(in_dic_file)
+    # in_dic_file.close()
+    # fitsfiles = in_dic[inp_time]['radio_sbs']
     if custom_fits_list is not None:
+        print('are we here?')
         custom_list = glob.glob(
             #'/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
-                '/Volumes/Data/20170820/20220511/eovsa/bkg_subed/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
-            inp_time-36))
+                #'/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
+            '/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
+                        inp_time-213))
         print(custom_list)
         fitsfiles = custom_list
         print(fitsfiles)
     #outfitsfile = '/Volumes/Data/20170820/20220511/eovsa/allbd_wrapped/10s/T{0:0=4d}_allbd.fits'.format(inp_time)
-    outfitsfile = '/Volumes/Data/20170820/20220511/eovsa/allbd_wrapped/bkg_subed/10s/T{0:0=4d}_allbd_40spws.fits'.format(inp_time)
+    outfitsfile = '/Volumes/Data/20170820/20220511/eovsa/allbd_wrapped/0714/T{0:0=4d}_allbd_40spws.fits'.format(inp_time)
     # if custom_fits_list is not None:
     #     #outfitsfile = '/Volumes/Data/20170820/eovsa/allbd_wrapped/10s/subed_T_3820_3830_3730_3740_allbd.fits'
     #     #outfitsfile = '/Volumes/Data/20170820/eovsa/allbd_wrapped/10s/seperated_subed_T{0:0=4d}_allbd.fits'.format(inp_time)
     #     outfitsfile = '/Volumes/Data/20170820/eovsa/allbd_wrapped/seperated_1s_subed_T{0:0=4d}_allbd.fits'.format(
     #     inp_time)
-    fitsfiles = sorted(fitsfiles)[0:40]
+    fitsfiles = sorted(fitsfiles)[0:45]
     nband = len(fitsfiles)
     fits_exist = []
     idx_fits_exist = []
@@ -62,8 +64,8 @@ def fits_wrap_spwX(inp_time, high_tres=False, custom_fits_list=None):
     print('wrapped fits writed to ' + outfitsfile)
     return
 def main():
-    fits_wrap_spwX(inp_time=73)
-    fits_wrap_spwX(inp_time=72)
+    #fits_wrap_spwX(inp_time=8+33, custom_fits_list=True)
+    fits_wrap_spwX(inp_time=327+213, custom_fits_list=True)
 
 if __name__ == '__main__':
     main()

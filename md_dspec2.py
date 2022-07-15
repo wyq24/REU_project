@@ -264,7 +264,7 @@ def plt_dspec(specdata, pol='I', dmin=None, dmax=None,over_all_tr=None,
                 freqghz = freq
                 # ax.ticklabel_format(style='sci',axis='y')
                 if type(specdata) is not str:
-                    kwargs = {'norm': SymLogNorm(linthresh=specdata['spec'][0, 0, 24, 114] * 2, vmin=dmin, vmax=dmax)}
+                    kwargs = {'norm': SymLogNorm(linthresh=specdata['spec'][0, 0, 24, -10] * 2, vmin=dmin, vmax=dmax)}
                 else:
                     kwargs = {}
                 # ax.pcolormesh(tim_plt, freqghz, spec_plt, cmap='jet', vmin=dmin, vmax=dmax,**kwargs)

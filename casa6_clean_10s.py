@@ -33,7 +33,8 @@ doclean_slfcaled=1 #final clean of all the slfcaled data
 #workdir='/Volumes/Data/20170906/msdata/2021_new_calibration/'
 #workdir='/Volumes/Data/20170715/eovsa_large_fov/'
 #workdir='/Volumes/WD6T/working/20170703/eovsa/'
-workdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/'
+#workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/'
+workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/'
 #workdir='/Volumes/WD6T/working/eovsa_full_disk/'
 imagedir=workdir+'slfcal/images/'
 maskdir=workdir+'slfcal/masks/'
@@ -52,7 +53,7 @@ if not os.path.exists(imagedir_slfcaled):
 if not os.path.exists(caltbdir):
     os.makedirs(caltbdir)
 #refms = workdir+'msdata/IDB20170703_concat.ms'
-refms = workdir+'msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
+refms = workdir+'msdata/IDB20220511_1800-2000.ms.slfcaled'
 #refms = workdir+'msdata_stable/IDB20170910T154625-161625.ms.corrected'
 refms_slfcal_XXYY = refms + '.XXYY.slfcal'
 #refms_slfcal_XX = refms + '.XX.slfcal'
@@ -64,15 +65,16 @@ refms_slfcaled = refms + '.slfcaled'
 #refms_slfcaled = '/Volumes/WD6T/working/bkg_sub_eovsa_20170715/msdata/bkg_subed_IDB20170715_concat.ms'
 #refms_slfcaled = '/Volumes/WD6T/working/bkg_sub_eovsa_20170715/msdata/IDB20170715_concat.ms'
 #refms_slfcaled = '/Volumes/WD6T/working/20170703/eovsa_10s/msdata/IDB20170703_concat.ms.XXYY.slfcaled'
-refms_slfcaled = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
+#refms_slfcaled = workdir+'msdata/IDB20220511_1800-2000.ms.slfcaled'
+refms_slfcaled = workdir+'msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
 
-init_time='2022-05-11T18:36:00.002'
+init_time='2022-05-11T18:35:30.002'
 time_interval=10.0
 tranges=[]
 tname=[]
 
-start_time = Time('2022-05-11 18:40:36',format='iso')
-end_time = Time('2022-05-11 18:40:40',format='iso')
+start_time = Time('2022-05-11 18:42:11',format='iso')
+end_time = Time('2022-05-11 18:42:17',format='iso')
 #find the phasecenter
 midtime_mjd = (start_time.mjd + end_time.mjd) / 2.
 eph = hf.read_horizons(t0=Time(midtime_mjd, format='mjd'))
@@ -82,7 +84,8 @@ tb.close()
 
 ra0 = phadir[0]
 dec0 = phadir[1]
-xycen=[912.0,-295.0]
+#xycen=[912.0,-295.0]
+xycen=[920.0,-200.0]
 x0 = np.radians(xycen[0] / 3600.)
 y0 = np.radians(xycen[1] / 3600.)
 p0 = np.radians(eph['p0'][0])  # p angle in radians
@@ -114,7 +117,7 @@ ebmsize = ['{:.1f}arcsec'.format(crbm) for crbm in bmsize]
 #    ebmsize[iii] = max(sbeam * cfreqs[1] / cfreq, 6.)
     #cur_spw = str(ebmsize[iii])
 print('bmsizes are: ', ebmsize)
-for tint in range(300):
+for tint in range(500):
     init_t=Time(init_time,format='isot')
     timed1=TimeDelta((tint*time_interval)*1.0, format='sec')
     timed2=TimeDelta(time_interval, format='sec')
@@ -152,7 +155,7 @@ print('Phasecenter: ',phasecenter)
 #xran=[617,867]
 #yran=[-271,-21]
 spws=[str(s) for s in range(len(cfreqs))]
-antennas='!4;!9'
+antennas='!4'
 nround=3 #number of slfcal cycles
 
 subms_a=[]
@@ -162,7 +165,7 @@ slfcaledms_a=[]
 #for t in range(298):
 #for t in range(180):
 #for t in range(180):
-for t in range(300):
+for t in range(500):
     trange=tranges[t]
     slfcaledms_ = workdir+'slfcal/IDB20220511.ms.t{0:d}.XXYY.slfcaled'.format(t)
     #slfcaledms_ = workdir+'slfcal/IDB20170703.ms.t{0:d}.XX'.format(t)
@@ -172,8 +175,9 @@ for t in range(300):
     #if t>=40 and t<45:
     #if t>=144:
     #if t>=150:
-    #if not os.path.exists(slfcaledms_) and t in [36,141]:
-    if not os.path.exists(slfcaledms_) and t>=60 and t<120:
+    #if not os.path.exists(slfcaledms_) and t in [43]:
+    if not os.path.exists(slfcaledms_) and t==327:
+    #if not os.path.exists(slfcaledms_) and t>=181 and t<210:
         print(slfcaledms_+' no file found')
         split(vis=refms_slfcaled,outputvis=slfcaledms_,datacolumn='data',timerange=trange,correlation='')
     slfcaledms_a.append(slfcaledms_)
@@ -184,8 +188,9 @@ if doclean_slfcaled:
     #if os.path.exists(workdir+'slfcal/masks_a.p'):
     #    masks_a=pickle.load(open(workdir+'slfcal/masks_a.p','rb'))
     for t,trange in enumerate(tranges):
-        #if not t in [36,141]: continue
-        if t<60 or t>=120: continue
+        if not t in [327]: continue
+        #if t<181 or t>=210: continue
+        #if t>=60: continue
         #if t<40 or t>44: continue
         #if t<90 or t>94: continue
         #if t<0 or t>2: continue
@@ -212,6 +217,7 @@ if doclean_slfcaled:
         #fig = plt.figure(figsize=(12,10))
         gs = gridspec.GridSpec(6, 5)
         for s,sp in enumerate(spws):
+            #if not s in [44]: continue
             #if s<4:
             #    sp = '4'
             #if s!=1: continue
@@ -245,7 +251,7 @@ if doclean_slfcaled:
                 mask = masks[3]
             #print 'using mask {0:s}'.format(mask)
             '''
-            if not os.path.exists(fitsfile) and t<180:
+            if not os.path.exists(fitsfile):
                 #print 'cleaning spw {0:s} with beam size {1:.1f}"'.format(sp,bm)
                 print('not existing, cleaning spw {0} with beam size {1}"'.format(sp,bm))
                 # try:
@@ -282,7 +288,7 @@ if doclean_slfcaled:
                 res = ptclean(vis=slfcaledms,
                               imageprefix=imagedir_slfcaled,
                               imagesuffix=imname,
-                              antenna='!4;!9',
+                              antenna='!4',
                               timerange=trange,
                               twidth=12,
                               spw=sp,
@@ -290,7 +296,7 @@ if doclean_slfcaled:
                               ncpu=6,
                               niter=1000,
                               gain=0.1,
-                              imsize=[256],
+                              imsize=[512],
                               cell=['2arcsec'],
                               stokes='XX',
                               doreg=True,

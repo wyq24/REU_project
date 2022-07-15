@@ -14,11 +14,15 @@ from matplotlib.lines import Line2D
 
 import lightcurves_two_axes as lcta
 import warnings
+import os
 
 import copy
 
 def all_aia_movie_contour(tim,plot_rhessi=None,high_tres=False, inp_fig=None):
+    # if os.path.exists('/Volumes/Data/20170820/20220511/movie/10s/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(tim)):
+    #     exit()
     warnings.filterwarnings('ignore')
+    #plt.ioff()
     with open('/Volumes/Data/20170820/20220511/info/bmsize.p', 'rb') as fbmsize:
         bmsize = pickle.load(fbmsize, encoding='latin1')
     fbmsize.close()
@@ -29,18 +33,17 @@ def all_aia_movie_contour(tim,plot_rhessi=None,high_tres=False, inp_fig=None):
     with open('/Volumes/Data/20170820/20220511/info/cfreqs.p', 'rb') as fcfreq:
         cfreq = pickle.load(fcfreq, encoding='latin1')
     fcfreq.close()
-    cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p'
+    cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long.p'
     in_dic_file = open(cur_dic, 'rb')
     in_dic = pickle.load(in_dic_file)
     in_dic_file.close()
-    #plt.ioff()
     if inp_fig is None:
         fig = plt.figure(figsize=(8, 10))
     else:
         fig = inp_fig
 
-    #cfov = [[800,-450],[1100,-150]]
-    cfov = [[800,-450],[1220,150]]
+    cfov = [[800,-450],[1100,-150]]
+    #cfov = [[800,-450],[1220,150]]
 
     kwlist = ['Z.94.', 'Z.131.', 'Z.171.', 'Z.304.']
     aia_axs_list = [1,2,3,4,5,6,7,8,13]
@@ -58,25 +61,27 @@ def all_aia_movie_contour(tim,plot_rhessi=None,high_tres=False, inp_fig=None):
         #if ki!=5:
         #    ep.justmap(cax=cax, kw=ckw, fov=cfov, tim=tim, enhance_it=True,judge_material=aia_exp)
         #else:
+        #ep.justmap(cax=cax, kw=ckw, fov=cfov, tim=tim, enhance_it=True,custom_kernel_size=[3,15],custom_color='gist_gray',prep_aia=False)
         ep.justmap(cax=cax, kw=ckw, fov=cfov, tim=tim, enhance_it=True,custom_kernel_size=[3,15],custom_color='gist_gray',prep_aia=False)
         #if ki == 1 and plot_rhessi:
 
         cl_list = [0.2,0.4,0.6,0.8,0.9]
-    #if tim > 33 and tim<209:
+    #if tim > 212 and tim<572:
     if tim < 0:
         ep.plot_eovsa_contour(tim=tim, ax=cax, fov=cfov, spws=range(40),
-                          abs_contourf=True,  abs_level=max_ref * 0.25,
-                            #abs_contourf=False, level=0.3,
+                          abs_contourf=True,  abs_level=max_ref * 0.1,
+                            #abs_contourf=False, level=0.5,
                           inp_rgba=plt.cm.Spectral,  calp=0.9)
         ep.add_custom_cb(target_ax=cax, cmin=cfreq[0], cmax=cfreq[-1], ctitle='GHz', cmap=plt.cm.Spectral,
                      insert=True, cloc=7, nbins=4, left_tick=True, within_height=0.8)
         cax.text(.5, .8, 'all spws @ 30%', horizontalalignment='center', transform=cax.transAxes, color='w', fontsize=12.0)
     lax2 = plt.subplot2grid((6, 2), (4, 0), colspan=2, rowspan=1)
     lax3 = plt.subplot2grid((6, 2), (5, 0), colspan=2, rowspan=1, sharex=lax2)
+    #lcta.lightcurves(specfile='/Volumes/Data/20170820/20220511/eovsa/image_dspec/fov_list_10s_dspec.p',
     lcta.lightcurves(specfile='/Volumes/Data/20170820/20220511/eovsa/image_dspec/fov_list_10s_dspec.p',
-                     goes=True,only_dspec=False,
+                                      goes=True,only_dspec=False,
                      # timerange=['2017-07-15 19:25:00.000', '2017-07-15 19:55:00.000'], custom_ax=[lax1, lax2, lax3])
-                     timerange=['2022-05-11 18:20:00.000', '2022-05-11 19:50:00.000'],
+                     timerange=['2022-05-11 18:00:00.000', '2022-05-11 19:50:00.000'],
                      custom_ax=[lax2, lax3], vmin=0.1, vmax=300.)
     # lcsf.lightcurves(specfile='/Volumes/Data/20170820/eovsa/msdata/IDB20170820_1950_2050.ms.dspec.npz',
     #                      hessifile='/Volumes/Data/20170820/hessi/hessi.sav', goes=True,
@@ -105,9 +110,10 @@ def all_aia_movie_contour(tim,plot_rhessi=None,high_tres=False, inp_fig=None):
                    ind_let_size=14, ind_let_color='w', no_xtick=False, no_ytick=False, index_letter='F',xspan=[[tim,tim+1],'b',1],ind_let_bkg='k')
     fig.suptitle(in_dic[tim]['time'])
     #plt.subplots_adjust(hspace=0.0, wspace=0.0, left=0.1, bottom=0.11, right=0.9, top=0.88)
-    # plt.savefig(
-    #     '/Volumes/Data/20170820/20220511/movie/10s_larger_aia/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(tim))
-    # plt.clf()
+    plt.savefig(
+        #'/Volumes/Data/20170820/20220511/movie/10s/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(tim))
+        '/Volumes/Data/20170820/20220511/movie/just_aia/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(tim))
+    plt.clf()
     plt.show()
 #def only_one_wavelength(tim):
 
@@ -419,8 +425,26 @@ def movie_wrapper_all(tr):##
         cfig.clear()
 
 def main():
-    all_aia_movie_contour(120)
-    #movie_wrapper_all([1,300])
+    import platform
+    import multiprocessing as mlp
+    if platform.system() == "Darwin":
+        mlp.set_start_method('spawn')
+    ncpu=8
+    pool = mlp.Pool(ncpu)
+    #res = pool.map(all_aia_movie_contour, range(213,378))
+    res = pool.map(all_aia_movie_contour, range(0,600))
+    pool.close()
+    pool.join()
+# #     #all_aia_movie_contour(360)
+
+# def main():
+#     for i in range(600):
+#         if os.path.exists('/Volumes/Data/20170820/20220511/movie/10s/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(i)): continue
+#         all_aia_movie_contour(tim=i)
+
+# def main():
+#    all_aia_movie_contour(tim=250)
+
 
 if __name__ == '__main__':
     main()

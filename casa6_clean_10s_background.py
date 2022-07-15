@@ -1,15 +1,21 @@
 from suncasa.utils import helioimage2fits as hf
 import os
 import numpy as np
-import pickle
-import pdb
-import mod_slftbs as mods
+
 from astropy.time import Time,TimeDelta
-from matplotlib import gridspec as gridspec
-from sunpy import map as smap
-from matplotlib import pyplot as plt
-import time
-from suncasa.utils import plot_map
+from casatools import table as tbtool
+from casatools import ms as mstool
+from casatools import quanta as qatool
+from casatools import image as iatool
+
+tb = tbtool()
+ms = mstool()
+qa = qatool()
+ia = iatool()
+from casatasks import tclean
+from casatasks import split
+from suncasa.suncasatasks import ptclean6 as ptclean
+
 #ebmsize=[40.89866667, 35.        , 30.52746815, 27.06907583, 24.30586371,
 #       22.0676259 , 20.20685112, 18.63547995, 17.29086809, 16.12723449,
 #       15.11034483, 14.21408712, 13.41819773, 12.70671085, 12.06687648,
@@ -27,7 +33,7 @@ doclean_slfcaled=1 #final clean of all the slfcaled data
 #workdir='/Volumes/Data/20170906/msdata/2021_new_calibration/'
 #workdir='/Volumes/Data/20170715/eovsa_large_fov/'
 #workdir='/Volumes/WD6T/working/20170703/eovsa/'
-workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/'
+workdir='/Volumes/Data/20170820/20220511/eovsa/background/'
 #workdir='/Volumes/WD6T/working/eovsa_full_disk/'
 imagedir=workdir+'slfcal/images/'
 maskdir=workdir+'slfcal/masks/'
@@ -46,7 +52,7 @@ if not os.path.exists(imagedir_slfcaled):
 if not os.path.exists(caltbdir):
     os.makedirs(caltbdir)
 #refms = workdir+'msdata/IDB20170703_concat.ms'
-refms = workdir+'msdata/IDB20220511_1800-2000.ms.slfcaled'
+refms = workdir+'msdata/IDB20220511_1803-1804.ms.slfcaled'
 #refms = workdir+'msdata_stable/IDB20170910T154625-161625.ms.corrected'
 refms_slfcal_XXYY = refms + '.XXYY.slfcal'
 #refms_slfcal_XX = refms + '.XX.slfcal'
@@ -58,35 +64,13 @@ refms_slfcaled = refms + '.slfcaled'
 #refms_slfcaled = '/Volumes/WD6T/working/bkg_sub_eovsa_20170715/msdata/bkg_subed_IDB20170715_concat.ms'
 #refms_slfcaled = '/Volumes/WD6T/working/bkg_sub_eovsa_20170715/msdata/IDB20170715_concat.ms'
 #refms_slfcaled = '/Volumes/WD6T/working/20170703/eovsa_10s/msdata/IDB20170703_concat.ms.XXYY.slfcaled'
-#refms_slfcaled = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
-refms_slfcaled = workdir+'msdata/IDB20220511_1800-2000.ms.slfcaled'
-#refms_slfcaled = '/Volumes/Data/20170715/eovsa_large_fov/msdata/IDB20170715_concat.ms'
-#refms_slfcaled = '/Volumes/WD6T/working/eovsa_full_disk/msdata/IDB20170715_concat.ms'
-#if not os.path.exists(refms_slfcal):
-#    os.system('cp -r '+refms+' '+refms_slfcal)
-#if not os.path.exists(refms_slfcal_XXYY):
-#if not os.path.exists(refms_slfcal_XX):
-#    split(vis=refms,outputvis=refms_slfcal_XXYY,datacolumn='data',correlation='XX,YY')
-    #split(vis=refms, outputvis=refms_slfcal_XX, datacolumn='data', correlation='XX')
-# selected times for generating self-calibration solutions
-#tranges=['2017/09/09/21:04:56~2017/09/09/21:05:00']
-#tranges=['2017/09/06/19:24:00~2017/09/06/19:24:10']
-# found from full-sun image in viewer
-#phacenter='J2000 11h11m17 05d10m28'
-#xran=[850,1050]
-#yran=[-250,-50]
-#init_time='2017-09-06T19:03:20.000'
-#init_time='2017-07-03T16:12:40.002'
-#init_time='2017-07-03T16:07:00.002'
-#init_time='2017-07-03T16:00:00.002'
-init_time='2022-05-11T18:35:30.002'
+refms_slfcaled = workdir+'msdata/IDB20220511_1803-1804.ms.slfcaled'
+
+init_time='2022-05-11T18:03:00.002'
 time_interval=10.0
 tranges=[]
 tname=[]
-#for tint in range(298):
-#for tint in range(298):
-#for tint in range(102):
-#for tint in range(180):
+
 start_time = Time('2022-05-11 18:42:11',format='iso')
 end_time = Time('2022-05-11 18:42:17',format='iso')
 #find the phasecenter
@@ -95,13 +79,7 @@ eph = hf.read_horizons(t0=Time(midtime_mjd, format='mjd'))
 tb.open(refms + '/FIELD')
 phadir = tb.getcol('PHASE_DIR').flatten()
 tb.close()
-#ms.open(refms)
-#metadata = ms.metadata()
-#observatory = metadata.observatorynames()[0]
-#spwInfo = ms.getspectralwindowinfo()
-#nspwall = len(spwInfo)
-#print(len(cfreqs))
-#ms.close()
+
 ra0 = phadir[0]
 dec0 = phadir[1]
 #xycen=[912.0,-295.0]
@@ -114,7 +92,7 @@ decoff = (x0) * np.sin(p0) + y0 * np.cos(p0)
 newra = ra0 + raoff
 newdec = dec0 + decoff
 phasecenter = 'J2000 ' + str(newra) + 'rad ' + str(newdec) + 'rad'
-cphasecenter = 'J2000 ' + str(ra0) + 'rad ' + str(dec0) + 'rad'
+#cphasecenter = 'J2000 ' + str(ra0) + 'rad ' + str(dec0) + 'rad'
 print('Phasecenter: ',phasecenter)
 
 tb.open(refms + '/SPECTRAL_WINDOW')
@@ -137,7 +115,7 @@ ebmsize = ['{:.1f}arcsec'.format(crbm) for crbm in bmsize]
 #    ebmsize[iii] = max(sbeam * cfreqs[1] / cfreq, 6.)
     #cur_spw = str(ebmsize[iii])
 print('bmsizes are: ', ebmsize)
-for tint in range(300):
+for tint in range(6):
     init_t=Time(init_time,format='isot')
     timed1=TimeDelta((tint*time_interval)*1.0, format='sec')
     timed2=TimeDelta(time_interval, format='sec')
@@ -185,9 +163,9 @@ slfcaledms_a=[]
 #for t in range(298):
 #for t in range(180):
 #for t in range(180):
-for t in range(300):
+for t in range(6):
     trange=tranges[t]
-    slfcaledms_ = workdir+'slfcal/IDB20220511.ms.t{0:d}.XXYY.slfcaled'.format(t)
+    slfcaledms_ = workdir+'slfcal/IDB20220511.ms_bkg_t{0:d}.slfcaled'.format(t)
     #slfcaledms_ = workdir+'slfcal/IDB20170703.ms.t{0:d}.XX'.format(t)
     #if t >= 40 and t<=44:
     #if t >= 90 and t<=94:
@@ -195,7 +173,8 @@ for t in range(300):
     #if t>=40 and t<45:
     #if t>=144:
     #if t>=150:
-    if not os.path.exists(slfcaledms_) and t in [0,8,36,111,141]:
+    #if not os.path.exists(slfcaledms_):
+    if not os.path.exists(slfcaledms_) and t in [2,3,4,5]:
         print(slfcaledms_+' no file found')
         split(vis=refms_slfcaled,outputvis=slfcaledms_,datacolumn='data',timerange=trange,correlation='')
     slfcaledms_a.append(slfcaledms_)
@@ -206,17 +185,19 @@ if doclean_slfcaled:
     #if os.path.exists(workdir+'slfcal/masks_a.p'):
     #    masks_a=pickle.load(open(workdir+'slfcal/masks_a.p','rb'))
     for t,trange in enumerate(tranges):
+        if not t in [2,3,4,5]: continue
+        #if t<60 or t>=120: continue
         #if t<40 or t>44: continue
         #if t<90 or t>94: continue
         #if t<0 or t>2: continue
         #if t< 40 or t >=45: continue
         #if t >=20: continue
         #if t < 144: continue
-        if not t in [0,8,36,111,141]: continue
         trange=tranges[t]
         slfcaledms = slfcaledms_a[t]
         #img_final=imagedir_slfcaled+'/slf_final_{0}_t{1:d}'.format(pol,t)
-        img_final=imagedir_slfcaled+'slfcaled_tb_final_XX_10s_{0}_t{1:d}'.format(pol,t)
+        #img_final=imagedir_slfcaled+'slfcaled_tb_final_XX_10s_{0}_t{1:d}'.format(pol,t)
+        img_final='slfcaled_tb_bkg_XX_10s_{0}_t{1:d}'.format(pol,t)
         #masks=masks_a[t]
         #spws=[str(s+1) for s in range(30)]
         #tb.open(slfcaledms+'/SPECTRAL_WINDOW')
@@ -267,40 +248,63 @@ if doclean_slfcaled:
             '''
             if not os.path.exists(fitsfile) and t<180:
                 #print 'cleaning spw {0:s} with beam size {1:.1f}"'.format(sp,bm)
-                print 'not existing, cleaning spw {0} with beam size {1}"'.format(sp,bm)
-                try:
-                    tclean(vis=slfcaledms,
-                    #tclean(vis=refms_slfcaled,
-                            antenna=antennas,
-                            imagename=imname,
-                            spw=sp,
-                            #spw='5',
-                            #spw=spwran,
-                            #mode='channel',
-                            specmode='mfs',
-                            timerange=trange,
-                            #imagermode='csclean',
-                            #psfmode='clark',
-                            imsize=[512],
-                            cell=['2arcsec'],
-                            niter=1000,
-                            gain=0.05,
-                            stokes='XX',
-                            weighting='briggs',
-                            #robust=2.0,
-                            robust=0.0,
-                            #restoringbeam=[str(bm)+'arcsec'],
-                            restoringbeam=[bm],
-                            #restoringbeam=['30arcsec'],
-                            phasecenter=phasecenter,
-                            #mask=mask,
-                            mask='',
-                            pbcor=True,
-                            interactive=False)
-                            #usescratch=False)
-                except:
-                    print 'cleaning spw '+sp+' unsuccessful. Proceed to next spw'
-                    continue
+                print('not existing, cleaning spw {0} with beam size {1}"'.format(sp,bm))
+                # try:
+                #     tclean(vis=slfcaledms,
+                #     #tclean(vis=refms_slfcaled,
+                #             antenna=antennas,
+                #             imagename=imname,
+                #             spw=sp,
+                #             #spw='5',
+                #             #spw=spwran,
+                #             #mode='channel',
+                #             specmode='mfs',
+                #             timerange=trange,
+                #             #imagermode='csclean',
+                #             #psfmode='clark',
+                #             imsize=[256],
+                #             cell=['2arcsec'],
+                #             niter=1000,
+                #             gain=0.1,
+                #             stokes='XX',
+                #             weighting='briggs',
+                #             #robust=2.0,
+                #             robust=0.0,
+                #             #restoringbeam=[str(bm)+'arcsec'],
+                #             restoringbeam=[bm],
+                #             #restoringbeam=['30arcsec'],
+                #             phasecenter=phasecenter,
+                #             #mask=mask,
+                #             mask='',
+                #             pbcor=True,
+                #             interactive=False)
+                #             #usescratch=False)
+
+                res = ptclean(vis=slfcaledms,
+                              imageprefix=imagedir_slfcaled,
+                              imagesuffix=imname,
+                              antenna='!4',
+                              timerange=trange,
+                              twidth=12,
+                              spw=sp,
+                              restoringbeam=[bm],
+                              ncpu=6,
+                              niter=1000,
+                              gain=0.1,
+                              imsize=[512],
+                              cell=['2arcsec'],
+                              stokes='XX',
+                              doreg=True,
+                              usephacenter=True,
+                              phasecenter=phasecenter,
+                              docompress=False,
+                              toTb=True,
+                              pbcor=True,
+                              weighting='briggs',
+                              robust=0.0)
+                # except:
+                #     print('cleaning spw '+sp+' unsuccessful. Proceed to next spw')
+                #     continue
                 if os.path.exists(imname+'.image'):
                     hf.imreg(vis=slfcaledms,imagefile=imname+'.image',fitsfile=fitsfile,
                              timerange=trange,toTb=True,verbose=False,)

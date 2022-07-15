@@ -8,7 +8,8 @@ import warnings
 import math
 
 def image_to_dynamicspec(fov=None, dic_file=None, spec_method=None, timerange=None,source_size=None,pix_size=2.0,high_tres = False):
-    #fov = [[940,-320],[960,-300]]
+    fov = [[930,-307],[942,-287]]
+    fov = [[930,-307],[942,-287]]
     fov_list = [[[862,-374],[1066,-176]],[[909,-349],[989,-223]],[[909,-345],[972,-226]],[[910,-298],[957,-235]],[[910,-295],[952,-243]]]
     warnings.filterwarnings('ignore')
     spec_dict = {}
@@ -19,7 +20,7 @@ def image_to_dynamicspec(fov=None, dic_file=None, spec_method=None, timerange=No
         cfreq = pickle.load(fcfreq, encoding='latin1')
     fcfreq.close()
     #cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long_aia.p'
-    cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_subed.p'
+    cur_dic = '/Volumes/Data/20170820/20220511/info/20220511_10s_long.p'
     in_dic_file = open(cur_dic, 'rb')
     in_dic = pickle.load(in_dic_file)
     in_dic_file.close()
@@ -71,7 +72,8 @@ def image_to_dynamicspec(fov=None, dic_file=None, spec_method=None, timerange=No
     #cur_name = '/Volumes/Data/20170820/eovsa/image_dspec/10s_dspec_{0}_{1}_{2}_{3}.p'.format(abs(cfov[0][0]),abs(cfov[0][1]),abs(cfov[1][0]),abs(cfov[1][1]))
     #cur_name = '/Volumes/Data/20170820/eovsa/image_dspec/part/10s_dspec_{0}_{1}_{2}_{3}.p'.format(abs(fov[0][0]),abs(fov[0][1]),abs(fov[1][0]),abs(fov[1][1]))
     #cur_name = '/Volumes/Data/20170820/20220511/eovsa/image_dspec/subed_10s_dspec_{0}_{1}_{2}_{3}.p'.format(abs(cfov[0][0]),abs(cfov[0][1]),abs(cfov[1][0]),abs(cfov[1][1]))
-    cur_name = '/Volumes/Data/20170820/20220511/eovsa/image_dspec/subed_fov_list_10s_dspec.p'
+    #cur_name = '/Volumes/Data/20170820/20220511/eovsa/image_dspec/submap/lower_fov_list_10s_{0}_{1}_{2}_{3}_dspec.p'.format(abs(cfov[0][0]),abs(cfov[0][1]),abs(cfov[1][0]),abs(cfov[1][1]))
+    cur_name = '/Volumes/Data/20170820/20220511/eovsa/image_dspec/fov_list_10s_dspec.p'
     #cur_name = '/Volumes/Data/20170820/eovsa/image_dspec/bkg_10s_dspec_{0}_{1}_{2}_{3}.p'.format(abs(cfov[0][0]),abs(cfov[0][1]),abs(cfov[1][0]),abs(cfov[1][1]))
     pickle.dump(spec_dict, open(cur_name,'wb'))
     return spec_dict

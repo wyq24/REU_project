@@ -24,7 +24,7 @@ opv = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/bkgsubed/IDB20
 #opv = 'IDB20220511_4730_4800_sub_4925_4950.ms'
 #ipv = '/Volumes/Data/20170820/20220511/eovsa/eovsa_full/msdata/IDB20220511_1800-2000.ms.XXYY.slfcaled'
 ipv = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms/'
-subvs2(vis = ipv, outputvis=opv,timerange=tr,subtime1=sub_tr,splitsel=False)
+subvs2(vis = ipv, outputvis=opv,timerange=tr,subtime1=sub_tr,splitsel=False,overwrite=True)
 # vis_list = makelist(tdir='/Volumes/Data/20170820/20220511/eovsa/bkg_subed/msdata/',keyword1='IDB',keyword2='led',
 #                     exclude='/Volumes/Data/20170820/20220511/eovsa/bkg_subed/msdata/IDB20220511_1841_1843_sub_1805_1808.ms.XXYY.slfcaled')
 # print(vis_list.sort())
