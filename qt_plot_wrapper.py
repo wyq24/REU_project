@@ -54,7 +54,8 @@ import matplotlib.pyplot as plt
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/eovsa_data/msdata/IDB20220511_1830-1850.ms'
 #specfile = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled.dspec.npz'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms'
-visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/playground/1842_ori/IDB20220511_1842-1843.ms'
+#visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/playground/1842_ori/IDB20220511_1842-1843.ms'
+visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/channels_test/playground/IDB20220511_1850-1851.ms.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/playground/IDB20220511_1842_11_17.ms.t0.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/playground/IDB20220511_1842_11_17.ms.t0.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/playground/1810/IDB20220511_1810-1811.ms.slfcaled'
@@ -70,7 +71,7 @@ from suncasa.utils.mstools import time2filename
 #timerange = '18:30:00~18:30:20'
 #timerange = '18:45:00~18:45:20'
 #timerange = '18:42:11~18:42:17'
-timerange = '18:42:00~18:42:20'
+timerange = '18:50:00~18:50:10'
 #timerange = '18:40:36~18:40:40'
 #timerange = ''
 #t0 = time.time()

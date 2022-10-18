@@ -110,10 +110,10 @@ def all_aia_movie_contour(tim,plot_rhessi=None,high_tres=False, inp_fig=None):
                    ind_let_size=14, ind_let_color='w', no_xtick=False, no_ytick=False, index_letter='F',xspan=[[tim,tim+1],'b',1],ind_let_bkg='k')
     fig.suptitle(in_dic[tim]['time'])
     #plt.subplots_adjust(hspace=0.0, wspace=0.0, left=0.1, bottom=0.11, right=0.9, top=0.88)
-    plt.savefig(
-        #'/Volumes/Data/20170820/20220511/movie/10s/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(tim))
-        '/Volumes/Data/20170820/20220511/movie/just_aia/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(tim))
-    plt.clf()
+    # plt.savefig(
+    #     #'/Volumes/Data/20170820/20220511/movie/10s/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(tim))
+    #     '/Volumes/Data/20170820/20220511/movie/just_aia/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(tim))
+    # plt.clf()
     plt.show()
 #def only_one_wavelength(tim):
 
@@ -424,17 +424,17 @@ def movie_wrapper_all(tr):##
         #aia_wl_only(tim=ii, inp_fig=cfig, high_tres=False)
         cfig.clear()
 
-def main():
-    import platform
-    import multiprocessing as mlp
-    if platform.system() == "Darwin":
-        mlp.set_start_method('spawn')
-    ncpu=8
-    pool = mlp.Pool(ncpu)
-    #res = pool.map(all_aia_movie_contour, range(213,378))
-    res = pool.map(all_aia_movie_contour, range(0,600))
-    pool.close()
-    pool.join()
+# def main():
+#     import platform
+#     import multiprocessing as mlp
+#     if platform.system() == "Darwin":
+#         mlp.set_start_method('spawn')
+#     ncpu=8
+#     pool = mlp.Pool(ncpu)
+#     #res = pool.map(all_aia_movie_contour, range(213,378))
+#     res = pool.map(all_aia_movie_contour, range(0,600))
+#     pool.close()
+#     pool.join()
 # #     #all_aia_movie_contour(360)
 
 # def main():
@@ -442,8 +442,8 @@ def main():
 #         if os.path.exists('/Volumes/Data/20170820/20220511/movie/10s/aia_eovsa_contour_abs_t{0:0=4d}.png'.format(i)): continue
 #         all_aia_movie_contour(tim=i)
 
-# def main():
-#    all_aia_movie_contour(tim=250)
+def main():
+   all_aia_movie_contour(tim=250)
 
 
 if __name__ == '__main__':

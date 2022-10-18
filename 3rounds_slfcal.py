@@ -48,7 +48,8 @@ doclean_slfcaled=0 #final clean of all the slfcaled data
 #workdir='/Volumes/WD6T/working/eovsa_events/20170703/'
 #workdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/'
 #workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/'
-workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/'
+#workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/'
+workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/channels_test/'
 #workdir='/Volumes/WD6T/working/eovsa_full_disk/'
 imagedir=workdir+'slfcal/images/'
 maskdir=workdir+'slfcal/masks/'
@@ -88,7 +89,8 @@ if not os.path.exists(refms_slfcal_XXYY):
 #tranges=['2017/07/15/19:32:10~2017/07/15/19:32:16']
 #tranges=['2021/05/08/18:38:18~2021/05/08/18:38:24']
 #tranges=['2022/05/11/18:42:13~2022/05/11/18:42:17']
-tranges=['2022/05/11/19:29:00~2022/05/11/19:29:30']
+tranges=['2022/05/11/18:42:12~2022/05/11/18:42:18']
+#tranges=['2022/05/11/19:29:00~2022/05/11/19:29:30']
 #tranges=['2021/05/08/18:43:25~2021/05/08/18:43:35']
 start_time = Time('2022-05-11 18:42:13',format='iso')
 end_time = Time('2022-05-11 18:42:17',format='iso')
@@ -188,11 +190,11 @@ if dofullsun:
     tclean(vis=slfcalms_a[0],
             antenna=antennas,
             imagename=im_init,
-            spw='0~15',
+            spw='2~5',
             specmode='mfs',
             timerange=trange,
             imsize=[512],
-            cell=['2arcsec'],
+            cell=['5arcsec'],
             niter=1000,
             gain=0.05,
             stokes='I',

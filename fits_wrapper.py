@@ -17,14 +17,14 @@ def fits_wrap_spwX(inp_time, high_tres=False, custom_fits_list=None):
         print('are we here?')
         custom_list = glob.glob(
             #'/Volumes/Data/20170820/20220511/eovsa/eovsa_full/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
-                #'/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
-            '/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
+                '/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
+            #'/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/slfcal/images_slfcaled/20220511T*.500slfcaled_tb_final_XX_10s_XX_t{0}_s*.fits'.format(
                         inp_time-213))
         print(custom_list)
         fitsfiles = custom_list
         print(fitsfiles)
     #outfitsfile = '/Volumes/Data/20170820/20220511/eovsa/allbd_wrapped/10s/T{0:0=4d}_allbd.fits'.format(inp_time)
-    outfitsfile = '/Volumes/Data/20170820/20220511/eovsa/allbd_wrapped/0714/T{0:0=4d}_allbd_40spws.fits'.format(inp_time)
+    outfitsfile = '/Volumes/Data/20170820/20220511/eovsa/allbd_wrapped/10s/T{0:0=4d}_allbd_40spws.fits'.format(inp_time)
     # if custom_fits_list is not None:
     #     #outfitsfile = '/Volumes/Data/20170820/eovsa/allbd_wrapped/10s/subed_T_3820_3830_3730_3740_allbd.fits'
     #     #outfitsfile = '/Volumes/Data/20170820/eovsa/allbd_wrapped/10s/seperated_subed_T{0:0=4d}_allbd.fits'.format(inp_time)
@@ -65,7 +65,7 @@ def fits_wrap_spwX(inp_time, high_tres=False, custom_fits_list=None):
     return
 def main():
     #fits_wrap_spwX(inp_time=8+33, custom_fits_list=True)
-    fits_wrap_spwX(inp_time=327+213, custom_fits_list=True)
+    fits_wrap_spwX(inp_time=72+213, custom_fits_list=True)
 
 if __name__ == '__main__':
     main()

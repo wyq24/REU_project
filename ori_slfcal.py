@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/Users/walterwei/opt/miniconda3/envs/scasa_env/lib/python3.6/site-packages')
+sys.path.append('/Users/walter/opt/anaconda3/envs/scasa_env/lib/python3.6/site-packages')
 from suncasa.utils import helioimage2fits as hf
 import os
 import numpy as np
@@ -38,17 +38,18 @@ from astropy.time import Time, TimeDelta
 #       10.        , 10.        , 10.        , 10.        , 10.        ,
 #       10.        , 10.        , 10.        , 10.        , 10.        ]
 # task handles
-dofullsun = 0
+dofullsun = 1
 domasks = 0
 doslfcal = 0
-doapply = 1
+doapply = 0
 dofinalclean = 0  # final clean of the slfcaled data for the selected slfcal time only
 doclean_slfcaled = 0  # final clean of all the slfcaled data
 
 # workdir='/Volumes/Data/20170906/msdata/2021_new_calibration/'
 # workdir='/Volumes/WD6T/working/eovsa_events/20170703/'
 # workdir='/Volumes/Data/20170820/20220511/eovsa/eovsa_full/'
-workdir = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/'
+#workdir = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/'
+workdir='/Volumes/Data/20170820/20220511/eovsa/1800_2000/channels_test/'
 # workdir='/Volumes/WD6T/working/eovsa_full_disk/'
 imagedir = workdir + 'slfcal/images/'
 maskdir = workdir + 'slfcal/masks/'
@@ -69,7 +70,7 @@ if not os.path.exists(caltbdir):
 # refms = workdir+'msdata/IDB20170906191320-20170906194320.corrected.ms'
 # refms = workdir+'msdata/IDB20170703_concat.ms'
 # refms = workdir+'msdata/IDB20210508_1800_1920.ms'
-refms = workdir + 'msdata/IDB20220511_1800-2000.ms'
+refms = workdir + 'msdata/IDB20220511_1835-1855.ms'
 refms_slfcal_XXYY = refms + '.XXYY.slfcal'
 # refms_slfcal_XX = refms + '.XX.slfcal'
 refms_slfcaled_XXYY = refms + '.XXYY.slfcaled'
@@ -106,8 +107,9 @@ tb.close()
 # ms.close()
 ra0 = phadir[0]
 dec0 = phadir[1]
-xycen = [912.0, -295.0]
-#xycen = [0.0, 0.0]
+#xycen = [912.0, -295.0]
+xycen = [0.0, 0.0]
+#xycen =[920.0,-200.0]
 x0 = np.radians(xycen[0] / 3600.)
 y0 = np.radians(xycen[1] / 3600.)
 p0 = np.radians(eph['p0'][0])  # p angle in radians
@@ -177,6 +179,44 @@ for t, trange in enumerate(tranges):
     subms_a.append(subms_)
     slfcaledms_a.append(slfcaledms_)
 print('HERE WE ARE!')
+if dofullsun:
+    #initial mfs clean to find out the image phase center
+    im_init='fullsun_init_10_15'
+    os.system('rm -rf '+im_init+'*')
+    tclean(vis=slfcalms_a[0],
+            antenna=antennas,
+            imagename=im_init,
+            spw='10~15',
+            specmode='mfs',
+            timerange=trange,
+            imsize=[512],
+            cell=['5arcsec'],
+            niter=1000,
+            gain=0.05,
+            stokes='I',
+            restoringbeam=['30arcsec'],
+            interactive=False,
+            phasecenter=phasecenter,
+            pbcor=True)
+
+    hf.imreg(vis=slfcalms_a[0],imagefile=im_init+'.image.pbcor',fitsfile=im_init+'.fits',
+             timerange=trange,usephacenter=False,verbose=True)
+    clnjunks = ['.flux', '.mask', '.model', '.psf', '.residual','.sumwt','.pb','.image']
+    for clnjunk in clnjunks:
+        if os.path.exists(im_init + clnjunk):
+            os.system('rm -rf '+im_init + clnjunk)
+
+    from sunpy import map as smap
+    from matplotlib import pyplot as plt
+    fig = plt.figure(figsize=(6,6))
+    ax = fig.add_subplot(111)
+    eomap=smap.Map(im_init+'.fits')
+    #eomap.data=eomap.data.reshape((npix,npix))
+    eomap.plot_settings['cmap'] = plt.get_cmap('jet')
+    eomap.plot(axes = ax)
+    eomap.draw_limb()
+    plt.show()
+    viewer(im_init+'.image.pbcor')
 masks_a = []
 if domasks:
     for t, trange in enumerate(tranges):
