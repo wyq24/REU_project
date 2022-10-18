@@ -500,8 +500,8 @@ def main():
     #cali_tp_spectrum()
     #tmp_spectrum_creator()
     #cal_ratio()
-    tp_lightcurve()
-    #TP_dynamic_spectrum()
+    #tp_lightcurve()
+    TP_dynamic_spectrum()
 
 if __name__ == '__main__':
     main()
