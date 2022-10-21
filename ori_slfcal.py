@@ -178,7 +178,7 @@ for t, trange in enumerate(tranges):
     slfcalms_a.append(slfcalms_)
     subms_a.append(subms_)
     slfcaledms_a.append(slfcaledms_)
-print('HERE WE ARE!')
+
 if dofullsun:
     #initial mfs clean to find out the image phase center
     im_init='fullsun_init_10_15'
