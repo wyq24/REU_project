@@ -35,13 +35,13 @@ dodspec = 0
 dofullsun = 0  # initial full-sun imaging
 doqlookplot = 0
 domasks = 0  # get masks
-doslfcal = 1  # main cycle of doing selfcalibration
+doslfcal = 0  # main cycle of doing selfcalibration
 doapply = 0  # apply the results
 doclean_slfcaled = 1  # perform clean for self-calibrated data
 
 # ============ declaring the working directories ============
 # workdir = os.getcwd()+'/' #main working directory. Using current directory in this example
-workdir = '/Users/fisher/Desktop/work/research/EOVSA_20220511_Mflare/EOVSA/'  # main working directory.
+workdir = '/Volumes/WD6T/working/20220511/slfcal_sijie/'  # main working directory.
 slfcaldir = os.path.join(workdir, 'slfcal/')  # place to put all selfcalibration products
 imagedir = os.path.join(slfcaldir, 'images/')  # place to put all selfcalibration images
 maskdir = os.path.join(slfcaldir, 'masks/')  # place to put clean masks
@@ -56,7 +56,8 @@ for d in dirs:
 os.chdir(workdir)
 # ============ Split a short time for self-calibration ===========
 # input visibility
-ms_in = os.path.join(workdir, 'IDB20220511_1830-1850.cal.ms')
+ms_in = os.path.join(workdir, 'msdata/IDB20220511_1830-1850.cal.ms')
+#ms_in = os.path.join(workdir, 'msdata/IDB20220511_1830-1850.ms')
 # clearcal(ms_in)
 # delmod(ms_in)
 if dodspec:
@@ -86,7 +87,9 @@ for t, trange in enumerate(tranges):
     slfcalms_ = slfcaldir + 'slfcalms.t{0:d}.XX.slfcal'.format(t)
     slfcaledms_ = slfcaldir + 'slfcalms.t{0:d}.XX.slfcaled'.format(t)
     if not os.path.exists(slfcalms_):
+        print('no files found, splitting')
         split(vis=ms_in, outputvis=slfcalms_, datacolumn='data', timerange=trange, correlation='XX', width=30)
+        split(vis=ms_in, outputvis=slfcaledms_, datacolumn='data', timerange=trange, correlation='XX', width=30)
     slfcalms_a.append(slfcalms_)
     slfcaledms_a.append(slfcaledms_)
 
@@ -132,7 +135,7 @@ if dofullsun:
     tclean(vis=slfcalms_a[0],
            antenna='0~12',
            imagename=im_init,
-           spw='11~20',
+           spw='2',
            specmode='mfs',
            timerange=tranges[0],
            imsize=[npix],
@@ -140,7 +143,7 @@ if dofullsun:
            niter=1000,
            gain=0.05,
            stokes='XX',
-           restoringbeam=['10arcsec'],
+           restoringbeam=['50arcsec'],
            interactive=False,
            pbcor=True)
 
@@ -168,9 +171,9 @@ if doqlookplot:
                  overwrite=True,
                  pbcor=True, toTb=True,
                  dnorm=colors.LogNorm(vmax=2000, vmin=0.5),
-                 aiafits='../aiafiles/2022_05_11__18_42_18_626__SDO_AIA_AIA_131.jp2',
+                 aiafits='/Volumes/WD6T/working/20220511/aia/aia.lev1_euv_12s.2022-05-11T184221Z.171.image_lev1.fits',
                  # spw=spw,
-                 spw='6~10',
+                 spw='2',
                  # spw='30~39',
                  # spw='40~49',
                  # xycen=[940, -260],
@@ -182,10 +185,11 @@ if doqlookplot:
                  # aiawave='131',
                  # amin=50,
                  # robust = -0.5,
-                 restoringbeam=['8arcsec'],  # spw='30~39'
+                 #restoringbeam=['8arcsec'],  # spw='30~39'
                  # restoringbeam=['5arcsec'], #spw='40~49'
-                 # restoringbeam=['30arcsec'], # spw='6~10'
-                 # restoringbeam=['70arcsec'], # spw='0~1'
+                 #restoringbeam=['30arcsec'], # spw='6~10'
+                 #restoringbeam=['70arcsec'], # spw='0~1'
+                 restoringbeam=['45arcsec'], # spw='2~5'
                  icmap='jet',
                  docompress=True, stokes='XX')
 
@@ -359,7 +363,8 @@ if doslfcal:
                         spbg = max(sp_ - 3, 2)
                         sped = sp_ + 3
                     else:
-                        spbg = 28
+                        #spbg = 28
+                        spbg = max(sp_ - 4, 2)
                         sped = min(sp_ + 4, 49)
 
                     spwran = str(spbg) + '~' + str(sped)
@@ -425,7 +430,7 @@ if doslfcal:
                 ax.get_yaxis().set_visible(False)
                 ax.set_xlim(xran)
                 ax.set_ylim(yran)
-                os.system('rm -f ' + fitsfile)
+                #os.system('rm -f ' + fitsfile)
 
                 # except:
                 # print('error in cleaning spw: '+sp)

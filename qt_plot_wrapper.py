@@ -55,7 +55,7 @@ import matplotlib.pyplot as plt
 #specfile = '/Volumes/Data/20170820/20220511/eovsa/background/IDB20220511_1805-1815.ms.XXYY.slfcaled.dspec.npz'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/play_ground/original/IDB20220511_1830-1850.ms'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/playground/1842_ori/IDB20220511_1842-1843.ms'
-visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/channels_test/playground/IDB20220511_1850-1851.ms.XXYY.slfcaled'
+visibility_data = '/Volumes/WD6T/working/20220511/slfcal_sijie/IDB20220511_1830-1850.cal.ms.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/full_disk_slfcal/playground/IDB20220511_1842_11_17.ms.t0.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/data/playground/IDB20220511_1842_11_17.ms.t0.XXYY.slfcaled'
 #visibility_data = '/Volumes/Data/20170820/20220511/eovsa/1800_2000/playground/1810/IDB20220511_1810-1811.ms.slfcaled'
@@ -70,8 +70,8 @@ from suncasa.utils.mstools import time2filename
 #timerange = '18:40:25~18:40:45'
 #timerange = '18:30:00~18:30:20'
 #timerange = '18:45:00~18:45:20'
-#timerange = '18:42:11~18:42:17'
-timerange = '18:50:00~18:50:10'
+timerange = '18:42:11~18:42:17'
+#timerange = '18:50:00~18:50:10'
 #timerange = '18:40:36~18:40:40'
 #timerange = ''
 #t0 = time.time()
@@ -80,18 +80,19 @@ import time
 # The example below shows the cross-power spectrogram from a baseline selected using the parameter "bl".
 # bl = '4&9' means selecting a baseline from Antenna ID 4 (Antenna Name "eo05") correlating with Antenna ID 9 (Antenna Name "eo10") - c.f., listobs outputs.
 # you can also use the "bl" parameter to select multiple baseline(s), i.e., bl='0&2;4&9;8&11'.
-specfile = visibility_data + '.dspec.npz'
-d = ds.Dspec(visibility_data, bl='5&10', specfile=specfile)
-d.plot(vmin=0.0, vmax=50, pol='XX')
-print(d.data.shape) # npol, nbl, nfreq, ntime
-
+#specfile = visibility_data + '.dspec.npz'
+specfile = '/Volumes/WD6T/working/20220511/slfcal_sijie/msdata/IDB20220511_1830-1850.cal.ms.dspec.npz'
+# d = ds.Dspec(visibility_data, bl='5&10', specfile=specfile)
+# d.plot(vmin=0.0, vmax=50, pol='XX')
+# print(d.data.shape) # npol, nbl, nfreq, ntime
+aiafits='/Volumes/WD6T/working/20220511/aia/aia.lev1_euv_12s.2022-05-11T184221Z.171.image_lev1.fits'
 #t_exec = time.time()-t0
 #t_elapsed += t_exec
 #print('Wall time of this cell: {}. Elapsed time since the beginning {}:'.format(datetime.timedelta(seconds=t_exec),datetime.timedelta(seconds=t_elapsed)))
 
 ## select (almost) all spectral windows from spw id #0 to #47
 #spw = ['{}'.format(l) for l in range(48)]
-spw = ['{}'.format(l) for l in range(45)]
+spw = ['{}'.format(l) for l in range(43)]
 outfits = time2filename(visibility_data,timerange=timerange)+'.outim.image.allbd.fits'
 ## select stokes XX
 stokes = 'XX'
@@ -116,7 +117,7 @@ aiawave = 171
 ## Choose the coloar map for AIA images. If not provided, the program will use default AIA colormap.
 acmap = 'gray_r'
 
-ql.qlookplot(vis=visibility_data, specfile=specfile, timerange=timerange,
+ql.qlookplot(vis=visibility_data, specfile=specfile, timerange=timerange,aiafits=aiafits,
              spw=spw, stokes=stokes, plotaia=plotaia, aiawave=aiawave,
              restoringbeam=['30arcsec'], robust = 0.5, acmap=acmap,
              imsize=imsize,cell=cell,xycen=xycen,fov=fov,
